@@ -1,0 +1,93 @@
+# beam configuration
+colpar 1              # colliding particles: 1=hadron-hadron UPC, 2=electron/positron-proton, 3=e-e+, 4=gamma-gamma (exclusive, i.e., do not break up initial hadrons)
+energy_beam1 7000d0   # beam 1 energy per nucleon/electron/positron/gamma (GeV)
+energy_beam2 7000d0   # beam 2 energy per nucleon/electron/positron/gamma (GeV)
+nuclearA_beam1  0     # A of nuclear of beam 1, 0: it is proton
+nuclearA_beam2  0     # A of nuclear of beam 2, 0: it is proton
+nuclearZ_beam1  0     # Z of nuclear of beam 1, 0: it is proton
+nuclearZ_beam2  0     # Z of nuclear of beam 2, 0: it is proton
+UPC_photon_flux 1     # only colpar=1. 1: ChFF (2207.03012); 2: EDFF (2207.03012); 3: improved Weizsacker-Williams (only for proton beams)
+
+# order
+# W loop we only have LO
+# for fermion loops, we have
+# A(0,0) one-loop amplitude
+# A(1,0) two-loop QCD amplitude
+# A(0,1) two-loop QED amplitude
+# 0: LO |A(0,0)|**2
+# 1: NLO QED |A(0,0)|**2+2*Re(DCONJG(A(0,0))*A(0,1))
+# 2: NLO QCD |A(0,0)|**2+2*Re(DCONJG(A(0,0))*A(1,0))
+# 3: NLO QED+QCD |A(0,0)|**2+2*Re(DCONJG(A(0,0))*(A(1,0)+A(0,1)))
+# -1: NLO QED |A(0,0)+A(0,1)|**2
+# -2: NLO QCD |A(0,0)+A(1,0)|**2
+# -3: NLO QED+QCD |A(0,0)+A(0,1)+A(1,0)|**2
+order -3
+
+# masses (negative means we will not include such a contribution)
+emass  0.0d0           # electron mass (pole mass)
+mumass  0.0d0          # muon mass (pole mass)
+taumass 1.77686d0      # tau mass (pole mass)
+umass 0.0d0            # up quark mass (pole mass)
+dmass 0.0d0            # down quark mass (pole mass)
+smass 0.0d0            # strange quark mass (pole mass)
+cmass 1.5d0            # charm quark mass (pole mass)
+bmass 4.75d0           # bottom quark mass (pole mass)
+tmass 172.69d0         # top quark mass (pole mass)
+wmass 80.377d0         # W mass
+
+# couplings
+alphaemm1     137.036d0    # alpha(0)**(-1)
+alphasMZ      0.118d0      # alpha_s(MZ) for the QCD corrections
+alphas_nloop  2            # how many loops run of alpha_s 
+                           # in the MSbar scheme (maximal 5)
+Gfermi        1.1663787d-5 # Gfermi only alpha_scheme=1    
+alphaMZm1     127.955d0    # alpha(MZ) with nq=5 only alpha_scheme=2
+alpha_scheme  0            # 0: use alpha(0) for the QED corrections
+                           # 1: use Gmu sheme for the QED corrections
+                           # 2: use alpha(mu) scheme from alpha(MZ) in 5FNS
+                           # for the QED corrections
+Scale         0            # renormalisation scale. 
+                           #  0: fixed scale; 
+                           #  1: pT of photon; 
+                           #  2: invariant mass of the final photons
+FScaleValue   10d0         # the scale value in the fixed scale (Scale = 0)
+muR_over_ref  1d0          # the true renorm central scale is muR_over_ref*scale
+reweight_Scale F           # reweight to get (renorm) scale dependence
+rw_RScale_down 0.5d0       # lower bound for renormalisation scale variations
+rw_RScale_up   2.0d0       # upper bound for renormalisation scale variations
+
+# kinematic cuts in the lab frame
+minptp 0d0                 # minimum photon pt
+maxptp -1.0d0              # maximum photon pt, negative no such cuts
+maxptpp -1.0d0             # maximum photon-pair pt, negative no such cuts
+maxaco  -1.0d0             # maximum acoplanarity, negative no such cuts
+maxyrapp 2.4d0             # maximum photon (pseudo-)rapidity
+minyrapp -2.4d0            # minimum photon (pseudo-)rapidity
+minmpp   4d0               # minimum invariant mass of photon-photon
+maxmpp   -1d0              # maximum invariant mass of photon-photon, negative no such cuts
+
+# event generation setup
+gener    0                 # integrator: 0 VEGAS; 1 Romberg
+unwgt    F                 # unweighting on/off (only gener=0)
+lhewgtup T                 # xwgtup=1 (F) or not (T) in unweighted lhe file
+nmc      100000            # number of Monte Carlo points or integrating points
+
+# histogram output
+topdrawer_output F         # topdrawer output file (T) or not (F)
+gnuplot_output   T         # gnuplot output file (T) or not (F)
+root_output      F         # root output file (T) or not (F)
+hwu_output       T         # hwu output file (T) or not (F)
+
+# gamma-UPC (2207.03012) options
+use_MC_Glauber F          # whether or not to use MC-Glauber TAA for the survival probability when colpar=1 and UPC_photon_flux=1 or 2.
+intrinsic_kt  F             # whether to include the intrinsic kT due to the non-zero virtuality of the initial photon in UPCs
+
+# technical stuff
+grid_gen   0              # 0: check whether there is a grid. If yes, just use the grid.
+                          #    Otherwise, generate a grid first and write to the disk and then use it. 
+                          # (the only option if there is either no FastGPL and handyG)
+                          # 1: force to generate a grid and write to the disk and then use it 
+                          # 2: just evaluate it directly without using the grid
+improve_w_LE  -1          # -1: We need to use the low/high-energy expansion results to improve the massive amplitudes
+                          #  0: We do not use the low/high-energy expansion results to improve the massive amplitudes
+                          #  1: We simply use the low-energy expansion results for the massive amplitudes

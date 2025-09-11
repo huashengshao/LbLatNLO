@@ -1,0 +1,22 @@
+
+LIBRARY= libfastgplfortran.$(libext)
+LIBDIR= ../../lib/
+
+include make_opts
+
+CXXFLAGS=-O2
+
+OBJ= fastgplfortran_dummy.o
+
+all: $(LIBDIR)$(LIBRARY)
+
+$(LIBDIR)$(LIBRARY): $(OBJ)
+	@$(call CREATELIB, $@, $^)
+	rm *.o
+
+clean_fastgplfortran:
+	rm -vf $(LIBDIR)$(LIBRARY) *~
+
+clean:
+	rm -vf *.o $(LIBDIR)$(LIBRARY) *~
+

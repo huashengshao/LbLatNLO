@@ -1,0 +1,330 @@
+#!/usr/bin/env bash
+# Guess values for system-dependent variables and create makefile
+
+# Option echo                                                                    
+if [ $(uname) == "Darwin" ];
+then
+    echooption="-e"
+elif [ $(uname) == "Linux" ];
+then
+    echooption="-e"
+else
+    echooption="-e"
+fi
+# create folders                                                                
+mkdir -p bin lib obj mod tmp output
+cd ./input
+mkdir -p paths
+cd ../
+# determine the fortran compiler
+FC=""
+cat ./input/configuration.txt | while read tmpline
+do
+    ttmpline=${tmpline:0:16}
+    if [ "$ttmpline" == "fortran_compiler" ]
+    then
+        i=16
+        tmppath=""
+        while true;
+        do
+            ttmpline=${tmpline:$i:1}
+            if [ "$ttmpline" == "=" ]
+            then
+                i=`expr $i + 1`
+                FC=${tmpline:$i}
+                if [ ! -z `which $FC` ]
+                then
+		    echo $echooption $FC >> "$PWD/tmp/FC.tmp"
+                fi
+                break
+            elif [ $i -lt 200 ]
+            then
+                i=`expr $i + 1`
+            else
+                break
+            fi
+        done
+    fi
+done
+if [ -f "$PWD/tmp/FC.tmp" ]
+then
+    read -r FC<"$PWD/tmp/FC.tmp"
+    rm $PWD/tmp/FC.tmp
+fi
+if [ -z "$FC" ]
+then
+    if [ ! -z `which gfortran` ]
+    then
+	FC=gfortran
+    elif [ ! -z `which ifort` ]
+    then
+	FC=ifort
+    elif [ ! -z `which g77` ]
+    then
+	FC=g77
+    elif [ ! -z `which f77` ]
+    then
+	FC=f77
+    elif [ ! -z `which lahey95` ]
+    then
+	FC=lahey95
+    else
+	echo "please specify the valid fortran compiler"
+	while read FC
+	do
+	    if [ ! -z `which $FC` ]
+	    then
+		break
+	    else
+		echo "$FC is not a valid fortran compiler"
+		echo "exit(y/n) ?"
+		read x
+		if [ "$x" == "y" ]
+		then
+		    exit
+		else
+		    echo "input the valid fortran compiler again"
+		fi
+	    fi
+	done
+    fi
+fi
+echo "Using fortran compiler $FC"
+if [ -f "$PWD/input/fortran_compiler" ]
+then
+    rm $PWD/input/fortran_compiler
+fi
+echo $echooption "FC=$FC" >> "$PWD/input/fortran_compiler"
+
+if [ "$(ls -A $PWD/input/paths)" ];
+then
+    rm $PWD/input/paths/*
+fi
+# find root path from system
+# $ROOTSYS or $PATH 
+find_rootpath(){
+    if [ -f "$PWD/input/paths/rootpath" ]
+    then
+	read -r root_path<"$PWD/input/paths/rootpath"
+    else
+	root_path=""
+    fi
+    if [ ! -d $root_path ] || [ ! -f $root_path/include/TTree.h ]
+    then
+        if [ -f "$PWD/input/paths/rootpath" ]
+        then
+            rm $PWD/input/paths/rootpath
+        fi
+        root_path=$ROOTSYS
+        if [ ! -d $root_path ] || [ ! -f $root_path/include/TTree.h ]
+        then
+            arr=$(echo $PATH | tr ":" "\n")
+            for xx in $arr
+            do
+                if [ -d "$x" ] && [ -f "$x/include/TTree.h" ]
+                then
+                    echo $echooption $xx >> "$PWD/input/paths/rootpath"
+                    break
+                fi
+            done
+        else
+            echo $echooption $root_path >> "$PWD/input/paths/rootpath"
+        fi
+    fi
+}
+# determine the path of FastGPL and handyG (quadruple precision)
+cat ./input/configuration.txt | while read tmpline
+do
+    ttmpline=${tmpline:0:7}
+    if [ "$ttmpline" == "fastgpl" ]
+    then
+	i=7
+	tmppath=""
+	while true;
+	do
+	    ttmpline=${tmpline:$i:1}
+	    if [ "$ttmpline" == "=" ]
+	    then
+		i=`expr $i + 1`
+		fastgplpath=${tmpline:$i}
+		if [ -d $fastgplpath ]
+		then
+		    echo $echooption $fastgplpath >> "$PWD/input/paths/fastgplpath"
+		fi
+		break
+	    elif [ $i -lt 200 ]
+	    then
+		i=`expr $i + 1`
+	    else
+		break
+	    fi
+	done
+    fi
+    ttmpline=${tmpline:0:6}
+    if [ "$ttmpline" == "handyg" ]
+    then
+	i=6
+	tmppath=""
+	while true;
+	do
+	    ttmpline=${tmpline:$i:1}
+	    if [ "$ttmpline" == "=" ]
+	    then
+		i=`expr $i + 1`
+                handygpath=${tmpline:$i}
+                if [ -d $handygpath ]
+                then
+                    echo $echooption $handygpath >> "$PWD/input/paths/handygpath"
+                fi
+                break
+            elif [ $i -lt 200 ]
+            then
+                i=`expr $i + 1`
+            else
+                break
+	    fi
+	done
+    fi
+done
+# find the correct root path via system $ROOTSYS and $PATH
+# find_rootpath
+# set the global directories
+GPL_tools=""
+find_fastgpl=N
+exlibs=""
+include=""
+fastgplpath=""
+# link to fastgpl
+if [ -r "$PWD/input/paths/fastgplpath" ]
+then
+    # link to fastgpl
+    read -r fastgplpath<"./input/paths/fastgplpath"
+    fastgpllibflag="-L$fastgplpath/lib -lFastGPL"
+    exlibs="$exlibs $fastgpllibflag"
+    fastgpllibpath=$fastgplpath/lib
+    fastgplincludepath=$fastgplpath/include
+    if [[ $exlibs != *"-lstdc++"* ]]
+    then
+        exlibs="$exlibs -lstdc++"
+    fi
+    include="$include -I$fastgplincludepath"
+    fastgplpath="$fastgplpath"
+    find_fastgpl=Y
+    GPL_tools+="   LOGICAL,PARAMETER::FastGPL_tool=.TRUE.\n"
+else
+    echo "Warning: cannot find FastGPL path"
+    echo "Warning: will disable all FastGPL-related functionalities"
+    find_fastgpl=N
+    GPL_tools+="   LOGICAL,PARAMETER::FastGPL_tool=.FALSE.\n"
+#    exit 1
+fi
+# link to handyG (quadruple precision)
+handyGdummyobj=""
+handyGdummymod=""
+find_handyG=N
+if [ -r "$PWD/input/paths/handygpath" ]
+then
+    # link to handyG
+    read -r handygpath<"./input/paths/handygpath"
+    handyglibflag="-L$handygpath -lhandyg"
+    exlibs="$exlibs $handyglibflag"
+    handyglibpath=$handygpath
+    handygincludepath=$handygpath
+    if [[ $exlibs != *"-lstdc++"* ]]
+    then
+        exlibs="$exlibs -lstdc++"
+    fi
+    include="$include -I$handygincludepath"
+    find_handyG=Y
+    GPL_tools+="   LOGICAL,PARAMETER::HandyG_tool=.TRUE."
+else
+    echo "Warning: cannot find handyG (quadruple precision) path"
+    echo "Warning: will disable all handyG-related functionalities"
+    find_handyG=N
+    GPL_tools+="   LOGICAL,PARAMETER::HandyG_tool=.FALSE."
+    handyGdummyobj="\$(objdir)handyg_dummy.o"
+    handyGdummymod="\$(moddir)handyg.mod"
+#    exit 1
+fi
+if [[ $exlibs != *"-lstdc++"* ]]
+then
+    exlibs="$exlibs -lstdc++"
+fi
+# write makefile
+write_makefile(){
+    local incfile="$1"
+    local outfile="$2"
+    if [ $outfile == "makefile" ]
+    then
+	local lhapdfobj=""
+    fi
+    line=""
+    cat $incfile | while read tmpline
+    do
+#    echo `expr substr "$tmpline" 2 4`                                          
+	if [ "$tmpline" == "FC=" ]
+	then
+            tmpline="$tmpline $FC"
+	elif [ "$tmpline" == "EXLIBS =" ]
+	then
+	    tmpline="$tmpline $exlibs"
+	elif [ "$tmpline" == "INCLUDE =" ]
+	then
+	    tmpline="$tmpline $include"
+	elif [ "$tmpline" == "FASTGPLPATH =" ]
+	then
+	    tmpline="$tmpline $fastgplpath"
+	elif [ "$tmpline" == "handyGdummyobj=" ]
+	then
+	    tmpline="$tmpline $handyGdummyobj"
+	elif [ "$tmpline" == "handyGdummymod=" ]
+	then
+	    tmpline="$tmpline $handyGdummymod"
+	elif [ "$tmpline" == "end" ]
+	then
+#       -s file exists and is not empty
+#       -f file exists and is not a directory
+#       -d directory exists
+#       -x file is executable
+#       -w file is writable
+#       -r file is readable
+            if [ -f $outfile ]
+            then
+		rm -f $outfile
+            fi
+            echo $echooption "$line" >> $outfile # makefile
+            break
+	else
+            ttmpline=${tmpline:1:4}
+            if [ "$ttmpline" == "(FC)" ]
+            then
+		tmpline="\t$tmpline"
+            fi
+            ttmpline=${tmpline:0:2}
+            if [ "$ttmpline" == "rm" ] || [ "$ttmpline" == "ln" ] || [ "$ttmpline" == "(c" ]
+            then
+		tmpline="\t$tmpline"
+            fi
+	    ttmpline=${tmpline:0:1}
+	    if [ "$ttmpline" == "@" ]
+	    then
+		tmpline="\t$tmpline"
+	    fi
+	fi
+	line="$line\n$tmpline"
+    done
+}
+if [ -f "$PWD/src/GPL_tools.inc" ]
+then
+    rm $PWD/src/GPL_tools.inc
+fi
+echo $echooption "$GPL_tools" >> ./src/GPL_tools.inc
+if [ "$find_fastgpl" == "Y" ]
+then
+    write_makefile ./gpl/fastgpl/makefile_fastgplfortran.inc ./gpl/fastgpl/makefile_fastgplfortran
+else
+    write_makefile ./gpl/fastgpl/makefile_fastgplfortran_dummy.inc ./gpl/fastgpl/makefile_fastgplfortran
+fi
+write_makefile ./input/template_files/makefile.inc makefile
+# compile
+make

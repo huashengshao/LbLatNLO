@@ -1,0 +1,24 @@
+################################################################################
+#
+# This File contains some configuration variable for HELAC-Onia
+#
+# Line starting by #! are comment and should remain commented
+# Line starting with # should be uncommented if you want to modify the default
+# values
+#
+################################################################################
+#! Prefered Fortran Compiler
+#! If None: try to find gfortran or ifort or g77 or f77 or lahey95 on the system
+#!
+fortran_compiler = gfortran-mp-10
+
+#! fastgpl (double precision) installation path
+#!  Path to the directory containing lib and include
+#!  If None: try to find one available on the system
+fastgpl = /Users/huasheng/Physics/NumericalGPL/FastGPL/FastGPL_install
+
+#! handyG (quadruple precision) path
+#!  Remember to compile with `./configure --quad'
+#!  Path to the directory containing libhandyg.a and handyg.mod
+#!  If None: try to find one available on the system
+handyg = /Users/huasheng/Physics/NumericalGPL/handyG/handyg-v0.2.0b-QP
