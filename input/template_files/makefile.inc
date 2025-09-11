@@ -26,7 +26,7 @@ $(exe): makefile_hbook makefile_gammaUPC makefile_fastgpl $(objs)
 	@rm *.o *.mod
 	$(FC) -o $(exe) $(objs) -L$(libdir) -lhbook -lgammaUPC $(EXLIBS) -lfastgplfortran
 
-$(objdir)phase_space_integrators.o $(moddir)phase_space_integrators.mod: $(srcdir)phase_space_integrators.f90 $(moddir)LbL_Global.mod $(moddir)plot_LbL.mod $(moddir)Constants.mod $(moddir)LbL_setscale.mod $(moddir)qcd_constants.mod $(moddir)qcd_setup.mod $(moddir)qcd_coupling.mod $(moddir)coupling_global.mod $(moddir)nintlib.mod $(moddir)LbL_cuts.mod $(moddir)NLOME.mod $(moddir)MC_VEGAS.mod $(moddir)photon_PDFs.mod $(moddir)GPL_wrapper.mod $(gammaupcdir)ElasticPhotonPhotonFlux.mod
+$(objdir)phase_space_integrators.o $(moddir)phase_space_integrators.mod: $(srcdir)phase_space_integrators.f90 $(moddir)LbL_Global.mod $(moddir)plot_LbL.mod $(moddir)Constants.mod $(moddir)LbL_setscale.mod $(moddir)qcd_constants.mod $(moddir)qcd_setup.mod $(moddir)qcd_coupling.mod $(moddir)coupling_global.mod $(moddir)nintlib.mod $(moddir)LbL_cuts.mod $(moddir)NLOME.mod $(moddir)MC_VEGAS.mod $(moddir)photon_PDFs.mod $(moddir)GPL_wrapper.mod $(gammaupcdir)elasticphotonphotonFlux.mod
 	$(FC) $(FFLAGS) -c $<
 
 $(objdir)plot_LbL.o $(moddir)plot_LbL.mod: $(plotdir)plot_LbL.f90 $(moddir)LbL_Global.mod $(moddir)kinetics.mod $(moddir)MC_VEGAS.mod
