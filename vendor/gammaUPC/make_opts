@@ -6,8 +6,6 @@ ifeq ($(origin FFLAGS),undefined)
 endif
 FFLAGS+= -ffixed-line-length-132 -std=legacy
 
-CXX=gcc
-
 # Set FC unless it's defined by an environment variable
 ifeq ($(origin FC),default)
   # FC=gfortran
