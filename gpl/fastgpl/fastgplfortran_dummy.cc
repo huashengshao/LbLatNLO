@@ -19,7 +19,7 @@ extern "C" {
     //    s(i) is relevant only when Im(a(i))=0
     // x: a non-negative real number
 
-    return 0.0+0.0i;
+    return (0.0,0.0);
     
   }
 
