@@ -50,7 +50,7 @@ $(objdir)calc_IterInts_RootMIs.o $(moddir)calc_IterInts_RootMIs.mod: $(srcdir)ca
 $(objdir)calc_IterInts_RootMIs_boundaryconstants.o $(moddir)calc_IterInts_RootMIs_boundaryconstants.mod: $(srcdir)calc_IterInts_RootMIs_boundaryconstants.f $(moddir)GPL_wrapper.mod
 	$(FC) $(FFLAGS) -c $<
 
-$(objdir)twoloopbasis.o: $(srcdir)twoloopbasis.f $(moddir)express_wz.mod $(moddir)kinetics.mod $(moddir)calc_IterInts_GPLMIs.mod $(moddir)calc_IterInts_RootMIs.mod $(moddir)GPL_wrapper.mod $(moddir)Func_PSI.mod
+$(objdir)twoloopbasis.o: $(srcdir)twoloopbasis.f $(moddir)LbL_Global.mod $(moddir)express_wz.mod $(moddir)kinetics.mod $(moddir)calc_IterInts_GPLMIs.mod $(moddir)calc_IterInts_RootMIs.mod $(moddir)GPL_wrapper.mod $(moddir)Func_PSI.mod
 	$(FC) $(FFLAGS) -c $<
 
 $(objdir)Integration_Paths.o $(moddir)Integration_Paths.mod: $(srcdir)Integration_Paths.f90

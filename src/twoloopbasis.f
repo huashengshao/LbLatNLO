@@ -2,6 +2,7 @@
       ! that have NOT yet been divided by the corresponding sqrt
       ! if exists
       subroutine UTtwoloopbasis(xs,xt,loopin,cres)
+      use LbL_Global
       use GPL_wrapper
       use express_wz
       use kinetics
@@ -87,7 +88,7 @@
       cres(ioff+45)=fE27_w4(xu,xt,w,z,G)
       ! 1: use trapezoid
       ! 2: use double exponential quadrature
-      integration_method=2
+      integration_method=grid_integration_method
       ! use the dynamical boundary points (not for Euclidean region)
       boundary_point_scheme=2
       npoints=1000 ! we can lower the number of points for integrals (matters only for trapezoid)
