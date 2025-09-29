@@ -7,7 +7,7 @@
     WRITE(*,*)'|         /\/\/\/\/\|_____/_____|/\/\/\/\/\           |'
     WRITE(*,*)'|                                                     |'
     WRITE(*,*)'| Light-by-light scattering at next-to-leading order  |'
-    WRITE(*,*)'|                   (VERSION 0.5)                     |'
+    WRITE(*,*)'|                   (VERSION 0.6)                     |'
     WRITE(*,*)'|                                                     |'
     WRITE(*,*)'|    Authors:                                         |'
     WRITE(*,*)'|            Ajjath A.H. (LPTHE Paris)                |'
