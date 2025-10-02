@@ -1,11 +1,41 @@
       module calc_IterInts_RootMIs
+      ! integration method:
+      ! 1: trapezoid
+      ! 2: double exponential quadrature
+      integer integration_method
+      data integration_method/1/
       ! 1: use the default fixed boundary points
       ! 2: use the dynamical boundary points (not for Euclidean region)
       integer boundary_point_scheme
       data boundary_point_scheme /1/
-      ! number of points for numerical integrations
+      ! number of points for numerical integrations (trapezoid)
       integer npoints
       data npoints/5000/ ! can lower npoints to 500 when using boundary_point_scheme=2
+      ! relative error for numerical integrations (double exponential quadrature)
+      ! double precision
+      integer DEQ_init
+      data DEQ_init/0/
+      save DEQ_init
+      double precision DEQ_eps
+      data DEQ_eps/1d-15/
+      integer lenaw
+      parameter (lenaw=8000)
+      double precision tiny
+      parameter (tiny=1.0d-307)
+      double precision aw(0:lenaw-1)
+      save aw
+      ! quadruple precision
+      integer DEQ_init_qp
+      data DEQ_init_qp/0/
+      save DEQ_init_qp
+      real*16 DEQ_eps_qp
+      data DEQ_eps_qp/1E-31_16/
+      integer lenaw_qp
+      parameter (lenaw_qp=16000)
+      real*16 tiny_qp
+      parameter (tiny_qp=1.0E-4931_16)
+      real*16 aw_qp(0:lenaw_qp-1)
+      save aw_qp
       ! boundary points
       ! Euclid: xsb<0 xtb<0
       ! Phys1: xsb>4 xtb<0
@@ -501,6 +531,7 @@
       double complex fE18Euclid_w3
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -508,7 +539,18 @@
       parameter (zeta3=1.20205690315959428539973816151144999076532573d0)
       parameter (zeta4=1.08232323371113819151600369654116790277475095d0)
       CALL SetPath_st(xsb,xsb0_Euclid,xtb,xtb0_Euclid)
-      CALL trapezoid_Cintegrator(npoints,fE18Euclid_w3_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE18Euclid_w3_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE18Euclid_w3_fxn,
+     $        one,integral)
+      endif
       fE18Euclid_w3=integral
       return
       end function fE18Euclid_w3
@@ -632,6 +674,7 @@
       double complex fE25Euclid_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -644,7 +687,18 @@
       fteq1(1)=dlog_f11(xsb,xtb)
       fteq1(2)=dlog_f12(xsb,xtb)
       fteq1(3)=dlog_f13(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE25Euclid_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE25Euclid_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE25Euclid_w4_fxn,
+     $        one,integral)
+      endif
       fE25Euclid_w4=integral
       return
       end function fE25Euclid_w4
@@ -827,6 +881,7 @@
       double complex fE26Euclid_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -841,7 +896,18 @@
       fteq1(3)=dlog_f4(xsb,xtb)
       fteq1(4)=dlog_f7(xsb,xtb)
       fteq1(5)=dlog_f10(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE26Euclid_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE26Euclid_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE26Euclid_w4_fxn,
+     $        one,integral)
+      endif
       fE26Euclid_w4=integral
       return
       end function fE26Euclid_w4
@@ -1076,6 +1142,7 @@
       double complex fE28Euclid_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -1087,7 +1154,18 @@
       CALL SetPath_st(xsb,xsb0_Euclid,xtb,xtb0_Euclid)
       fteq1(1)=dlog_f1(xsb,xtb)
       fteq1(2)=dlog_f9(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE28Euclid_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE28Euclid_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE28Euclid_w4_fxn,
+     $        one,integral)
+      endif
       fE28Euclid_w4=integral
       return
       end function fE28Euclid_w4
@@ -1277,6 +1355,7 @@
       double complex fE29Euclid_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -1291,7 +1370,18 @@
       fteq1(3)=dlog_f4(xsb,xtb)
       fteq1(4)=dlog_f8(xsb,xtb)
       fteq1(5)=dlog_f10(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE29Euclid_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE29Euclid_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE29Euclid_w4_fxn,
+     $        one,integral)
+      endif
       fE29Euclid_w4=integral
       return
       end function fE29Euclid_w4
@@ -1550,6 +1640,7 @@
       double complex fE18Phys1_w3
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -1559,7 +1650,18 @@
       double complex B18A3
       B18A3=B18A3_Phys1
       CALL SetPath_st(xsb,xsb0_Phys1,xtb,xtb0_Phys1)
-      CALL trapezoid_Cintegrator(npoints,fE18Phys1_w3_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE18Phys1_w3_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE18Phys1_w3_fxn,
+     $        one,integral)
+      endif
       fE18Phys1_w3=integral
       fE18Phys1_w3=fE18Phys1_w3+
      - +B18A3
@@ -1693,6 +1795,7 @@
       double complex fE25Phys1_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -1705,7 +1808,18 @@
       fteq1(1)=dlog_f11(xsb,xtb)
       fteq1(2)=dlog_f12(xsb,xtb)
       fteq1(3)=dlog_f13(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE25Phys1_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE25Phys1_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE25Phys1_w4_fxn,
+     $        one,integral)
+      endif
       fE25Phys1_w4=integral
       return
       end function fE25Phys1_w4
@@ -1918,6 +2032,7 @@
       double complex fE26Phys1_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -1934,7 +2049,18 @@
       fteq1(3)=dlog_f4(xsb,xtb)
       fteq1(4)=dlog_f7(xsb,xtb)
       fteq1(5)=dlog_f10(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE26Phys1_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE26Phys1_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE26Phys1_w4_fxn,
+     $        one,integral)
+      endif
       fE26Phys1_w4=integral
       fE26Phys1_w4=fE26Phys1_w4+
      - +B26A4
@@ -2215,6 +2341,7 @@
       double complex fE28Phys1_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -2228,7 +2355,18 @@
       CALL SetPath_st(xsb,xsb0_Phys1,xtb,xtb0_Phys1)
       fteq1(1)=dlog_f1(xsb,xtb)
       fteq1(2)=dlog_f9(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE28Phys1_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE28Phys1_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE28Phys1_w4_fxn,
+     $        one,integral)
+      endif
       fE28Phys1_w4=integral
       fE28Phys1_w4=fE28Phys1_w4+
      - +B28A4
@@ -2466,6 +2604,7 @@
       double complex fE29Phys1_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -2482,7 +2621,18 @@
       fteq1(3)=dlog_f4(xsb,xtb)
       fteq1(4)=dlog_f8(xsb,xtb)
       fteq1(5)=dlog_f10(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE29Phys1_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE29Phys1_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE29Phys1_w4_fxn,
+     $        one,integral)
+      endif
       fE29Phys1_w4=integral
       fE29Phys1_w4=fE29Phys1_w4+
      - +B29A4
@@ -2790,6 +2940,7 @@
       double complex fE18Phys2_w3
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -2799,7 +2950,18 @@
       double complex B18A3
       B18A3=B18A3_Phys2
       CALL SetPath_st(xsb,xsb0_Phys2,xtb,xtb0_Phys2)
-      CALL trapezoid_Cintegrator(npoints,fE18Phys2_w3_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE18Phys2_w3_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE18Phys2_w3_fxn,
+     $        one,integral)
+      endif
       fE18Phys2_w3=integral
       fE18Phys2_w3=fE18Phys2_w3+
      - +B18A3
@@ -2933,6 +3095,7 @@
       double complex fE25Phys2_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -2945,7 +3108,18 @@
       fteq1(1)=dlog_f11(xsb,xtb)
       fteq1(2)=dlog_f12(xsb,xtb)
       fteq1(3)=dlog_f13(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE25Phys2_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE25Phys2_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE25Phys2_w4_fxn,
+     $        one,integral)
+      endif
       fE25Phys2_w4=integral
       return
       end function fE25Phys2_w4
@@ -3158,6 +3332,7 @@
       double complex fE26Phys2_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -3174,7 +3349,18 @@
       fteq1(3)=dlog_f4(xsb,xtb)
       fteq1(4)=dlog_f7(xsb,xtb)
       fteq1(5)=dlog_f10(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE26Phys2_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE26Phys2_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE26Phys2_w4_fxn,
+     $        one,integral)
+      endif
       fE26Phys2_w4=integral
       fE26Phys2_w4=fE26Phys2_w4+
      - +B26A4
@@ -3455,6 +3641,7 @@
       double complex fE28Phys2_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -3468,7 +3655,18 @@
       CALL SetPath_st(xsb,xsb0_Phys2,xtb,xtb0_Phys2)
       fteq1(1)=dlog_f1(xsb,xtb)
       fteq1(2)=dlog_f9(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE28Phys2_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE28Phys2_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE28Phys2_w4_fxn,
+     $        one,integral)
+      endif
       fE28Phys2_w4=integral
       fE28Phys2_w4=fE28Phys2_w4+
      - +B28A4
@@ -3706,6 +3904,7 @@
       double complex fE29Phys2_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -3722,7 +3921,18 @@
       fteq1(3)=dlog_f4(xsb,xtb)
       fteq1(4)=dlog_f8(xsb,xtb)
       fteq1(5)=dlog_f10(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE29Phys2_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE29Phys2_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE29Phys2_w4_fxn,
+     $        one,integral)
+      endif
       fE29Phys2_w4=integral
       fE29Phys2_w4=fE29Phys2_w4+
      - +B29A4
@@ -4030,6 +4240,7 @@
       double complex fE18Phys3_w3
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -4037,7 +4248,18 @@
       parameter (zeta3=1.20205690315959428539973816151144999076532573d0)
       parameter (zeta4=1.08232323371113819151600369654116790277475095d0)
       CALL SetPath_st(xsb,xsb0_Phys3,xtb,xtb0_Phys3)
-      CALL trapezoid_Cintegrator(npoints,fE18Phys3_w3_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE18Phys3_w3_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE18Phys3_w3_fxn,
+     $        one,integral)
+      endif
       fE18Phys3_w3=integral
       return
       end function fE18Phys3_w3
@@ -4167,6 +4389,7 @@
       double complex fE25Phys3_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -4179,7 +4402,18 @@
       fteq1(1)=dlog_f11(xsb,xtb)
       fteq1(2)=dlog_f12(xsb,xtb)
       fteq1(3)=dlog_f13(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE25Phys3_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE25Phys3_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE25Phys3_w4_fxn,
+     $        one,integral)
+      endif
       fE25Phys3_w4=integral
       return
       end function fE25Phys3_w4
@@ -4381,6 +4615,7 @@
       double complex fE26Phys3_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -4397,7 +4632,18 @@
       fteq1(3)=dlog_f4(xsb,xtb)
       fteq1(4)=dlog_f7(xsb,xtb)
       fteq1(5)=dlog_f10(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE26Phys3_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE26Phys3_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE26Phys3_w4_fxn,
+     $        one,integral)
+      endif
       fE26Phys3_w4=integral
       fE26Phys3_w4=fE26Phys3_w4+
      - +B26A4
@@ -4662,6 +4908,7 @@
       double complex fE28Phys3_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -4673,7 +4920,18 @@
       CALL SetPath_st(xsb,xsb0_Phys3,xtb,xtb0_Phys3)
       fteq1(1)=dlog_f1(xsb,xtb)
       fteq1(2)=dlog_f9(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE28Phys3_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE28Phys3_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE28Phys3_w4_fxn,
+     $        one,integral)
+      endif
       fE28Phys3_w4=integral
       return
       end function fE28Phys3_w4
@@ -4879,6 +5137,7 @@
       double complex fE29Phys3_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -4893,7 +5152,18 @@
       fteq1(3)=dlog_f4(xsb,xtb)
       fteq1(4)=dlog_f8(xsb,xtb)
       fteq1(5)=dlog_f10(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE29Phys3_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE29Phys3_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE29Phys3_w4_fxn,
+     $        one,integral)
+      endif
       fE29Phys3_w4=integral
       return
       end function fE29Phys3_w4
@@ -5185,6 +5455,7 @@
       double complex fE18Phys4_w3
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -5192,7 +5463,18 @@
       parameter (zeta3=1.20205690315959428539973816151144999076532573d0)
       parameter (zeta4=1.08232323371113819151600369654116790277475095d0)
       CALL SetPath_st(xsb,xsb0_Phys4,xtb,xtb0_Phys4)
-      CALL trapezoid_Cintegrator(npoints,fE18Phys4_w3_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE18Phys4_w3_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE18Phys4_w3_fxn,
+     $        one,integral)
+      endif
       fE18Phys4_w3=integral
       return
       end function fE18Phys4_w3
@@ -5322,6 +5604,7 @@
       double complex fE25Phys4_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -5334,7 +5617,18 @@
       fteq1(1)=dlog_f11(xsb,xtb)
       fteq1(2)=dlog_f12(xsb,xtb)
       fteq1(3)=dlog_f13(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE25Phys4_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE25Phys4_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE25Phys4_w4_fxn,
+     $        one,integral)
+      endif
       fE25Phys4_w4=integral
       return
       end function fE25Phys4_w4
@@ -5536,6 +5830,7 @@
       double complex fE26Phys4_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -5552,7 +5847,18 @@
       fteq1(3)=dlog_f4(xsb,xtb)
       fteq1(4)=dlog_f7(xsb,xtb)
       fteq1(5)=dlog_f10(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE26Phys4_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE26Phys4_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE26Phys4_w4_fxn,
+     $        one,integral)
+      endif
       fE26Phys4_w4=integral
       fE26Phys4_w4=fE26Phys4_w4+
      - +B26A4
@@ -5817,6 +6123,7 @@
       double complex fE28Phys4_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -5828,7 +6135,18 @@
       CALL SetPath_st(xsb,xsb0_Phys4,xtb,xtb0_Phys4)
       fteq1(1)=dlog_f1(xsb,xtb)
       fteq1(2)=dlog_f9(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE28Phys4_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE28Phys4_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE28Phys4_w4_fxn,
+     $        one,integral)
+      endif
       fE28Phys4_w4=integral
       return
       end function fE28Phys4_w4
@@ -6034,6 +6352,7 @@
       double complex fE29Phys4_w4
       double precision xsb,xtb
       double complex integral
+      double precision error
       double precision ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0d0,ONE=1d0,TWO=2d0,THREE=3d0,FOUR=4d0,HALF=0.5d0)
       double precision zeta2,zeta3,zeta4
@@ -6048,7 +6367,18 @@
       fteq1(3)=dlog_f4(xsb,xtb)
       fteq1(4)=dlog_f8(xsb,xtb)
       fteq1(5)=dlog_f10(xsb,xtb)
-      CALL trapezoid_Cintegrator(npoints,fE29Phys4_w4_fxn,one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init.eq.0)then
+            CALL DEQuadrature_integrator_ini(lenaw,tiny,DEQ_eps,aw)
+            DEQ_init=1
+         endif
+         CALL DEQuadrature_Cintegrator(fE29Phys4_w4_fxn,zero,one,aw,
+     $        integral,error)
+      else
+         CALL trapezoid_Cintegrator(npoints,fE29Phys4_w4_fxn,
+     $        one,integral)
+      endif
       fE29Phys4_w4=integral
       return
       end function fE29Phys4_w4
@@ -7145,6 +7475,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE18Euclid_w3_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -7156,8 +7487,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       parameter (zeta4=
      $     1.08232323371113819151600369654116790277475095E0_16)
       CALL SetPath_st_qp(xsb,xsb0_Euclid_qp,xtb,xtb0_Euclid_qp)
-      CALL trapezoid_Cintegrator_QP(npoints,fE18Euclid_w3_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE18Euclid_w3_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE18Euclid_w3_qp_fxn,
+     $        one,integral)
+      endif
       fE18Euclid_w3_qp=integral
       return
       end function fE18Euclid_w3_qp
@@ -7286,6 +7628,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE25Euclid_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -7302,8 +7645,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(1)=dlog_f11_qp(xsb,xtb)
       fteq1(2)=dlog_f12_qp(xsb,xtb)
       fteq1(3)=dlog_f13_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE25Euclid_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE25Euclid_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE25Euclid_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE25Euclid_w4_qp=integral
       return
       end function fE25Euclid_w4_qp
@@ -7491,6 +7845,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE26Euclid_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -7509,8 +7864,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(3)=dlog_f4_qp(xsb,xtb)
       fteq1(4)=dlog_f7_qp(xsb,xtb)
       fteq1(5)=dlog_f10_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE26Euclid_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE26Euclid_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE26Euclid_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE26Euclid_w4_qp=integral
       return
       end function fE26Euclid_w4_qp
@@ -7750,6 +8116,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE28Euclid_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -7765,8 +8132,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       CALL SetPath_st_qp(xsb,xsb0_Euclid_qp,xtb,xtb0_Euclid_qp)
       fteq1(1)=dlog_f1_qp(xsb,xtb)
       fteq1(2)=dlog_f9_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE28Euclid_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE28Euclid_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE28Euclid_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE28Euclid_w4_qp=integral
       return
       end function fE28Euclid_w4_qp
@@ -7961,6 +8339,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE29Euclid_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -7979,8 +8358,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(3)=dlog_f4_qp(xsb,xtb)
       fteq1(4)=dlog_f8_qp(xsb,xtb)
       fteq1(5)=dlog_f10_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE29Euclid_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE29Euclid_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE29Euclid_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE29Euclid_w4_qp=integral
       return
       end function fE29Euclid_w4_qp
@@ -8244,6 +8634,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE18Phys1_w3_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -8257,8 +8648,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 B18A3
       B18A3=B18A3_Phys1_qp
       CALL SetPath_st_qp(xsb,xsb0_Phys1_qp,xtb,xtb0_Phys1_qp)
-      CALL trapezoid_Cintegrator_QP(npoints,fE18Phys1_w3_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE18Phys1_w3_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE18Phys1_w3_qp_fxn,
+     $        one,integral)
+      endif
       fE18Phys1_w3_qp=integral
       fE18Phys1_w3_qp=fE18Phys1_w3_qp+
      - +B18A3
@@ -8398,6 +8800,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE25Phys1_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -8414,8 +8817,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(1)=dlog_f11_qp(xsb,xtb)
       fteq1(2)=dlog_f12_qp(xsb,xtb)
       fteq1(3)=dlog_f13_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE25Phys1_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE25Phys1_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE25Phys1_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE25Phys1_w4_qp=integral
       return
       end function fE25Phys1_w4_qp
@@ -8634,6 +9048,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE26Phys1_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -8654,8 +9069,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(3)=dlog_f4_qp(xsb,xtb)
       fteq1(4)=dlog_f7_qp(xsb,xtb)
       fteq1(5)=dlog_f10_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE26Phys1_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE26Phys1_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE26Phys1_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE26Phys1_w4_qp=integral
       fE26Phys1_w4_qp=fE26Phys1_w4_qp+
      - +B26A4
@@ -8942,6 +9368,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE28Phys1_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -8959,8 +9386,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       CALL SetPath_st_qp(xsb,xsb0_Phys1_qp,xtb,xtb0_Phys1_qp)
       fteq1(1)=dlog_f1_qp(xsb,xtb)
       fteq1(2)=dlog_f9_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE28Phys1_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE28Phys1_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE28Phys1_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE28Phys1_w4_qp=integral
       fE28Phys1_w4_qp=fE28Phys1_w4_qp+
      - +B28A4
@@ -9204,6 +9642,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE29Phys1_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -9224,8 +9663,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(3)=dlog_f4_qp(xsb,xtb)
       fteq1(4)=dlog_f8_qp(xsb,xtb)
       fteq1(5)=dlog_f10_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE29Phys1_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE29Phys1_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE29Phys1_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE29Phys1_w4_qp=integral
       fE29Phys1_w4_qp=fE29Phys1_w4_qp+
      - +B29A4
@@ -9539,6 +9989,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE18Phys2_w3_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -9552,8 +10003,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 B18A3
       B18A3=B18A3_Phys2_qp
       CALL SetPath_st_qp(xsb,xsb0_Phys2_qp,xtb,xtb0_Phys2_qp)
-      CALL trapezoid_Cintegrator_QP(npoints,fE18Phys2_w3_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE18Phys2_w3_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE18Phys2_w3_qp_fxn,
+     $        one,integral)
+      endif
       fE18Phys2_w3_qp=integral
       fE18Phys2_w3_qp=fE18Phys2_w3_qp+
      - +B18A3
@@ -9693,6 +10155,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE25Phys2_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -9709,8 +10172,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(1)=dlog_f11_qp(xsb,xtb)
       fteq1(2)=dlog_f12_qp(xsb,xtb)
       fteq1(3)=dlog_f13_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE25Phys2_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE25Phys2_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE25Phys2_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE25Phys2_w4_qp=integral
       return
       end function fE25Phys2_w4_qp
@@ -9929,6 +10403,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE26Phys2_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -9949,8 +10424,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(3)=dlog_f4_qp(xsb,xtb)
       fteq1(4)=dlog_f7_qp(xsb,xtb)
       fteq1(5)=dlog_f10_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE26Phys2_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE26Phys2_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE26Phys2_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE26Phys2_w4_qp=integral
       fE26Phys2_w4_qp=fE26Phys2_w4_qp+
      - +B26A4
@@ -10237,6 +10723,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE28Phys2_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -10254,8 +10741,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       CALL SetPath_st_qp(xsb,xsb0_Phys2_qp,xtb,xtb0_Phys2_qp)
       fteq1(1)=dlog_f1_qp(xsb,xtb)
       fteq1(2)=dlog_f9_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE28Phys2_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE28Phys2_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE28Phys2_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE28Phys2_w4_qp=integral
       fE28Phys2_w4_qp=fE28Phys2_w4_qp+
      - +B28A4
@@ -10499,6 +10997,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE29Phys2_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -10519,8 +11018,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(3)=dlog_f4_qp(xsb,xtb)
       fteq1(4)=dlog_f8_qp(xsb,xtb)
       fteq1(5)=dlog_f10_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE29Phys2_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE29Phys2_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE29Phys2_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE29Phys2_w4_qp=integral
       fE29Phys2_w4_qp=fE29Phys2_w4_qp+
      - +B29A4
@@ -10834,6 +11344,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE18Phys3_w3_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -10845,8 +11356,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       parameter (zeta4=
      $     1.08232323371113819151600369654116790277475095E0_16)
       CALL SetPath_st_qp(xsb,xsb0_Phys3_qp,xtb,xtb0_Phys3_qp)
-      CALL trapezoid_Cintegrator_QP(npoints,fE18Phys3_w3_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE18Phys3_w3_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE18Phys3_w3_qp_fxn,
+     $        one,integral)
+      endif
       fE18Phys3_w3_qp=integral
       return
       end function fE18Phys3_w3_qp
@@ -10982,6 +11504,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE25Phys3_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -10998,8 +11521,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(1)=dlog_f11_qp(xsb,xtb)
       fteq1(2)=dlog_f12_qp(xsb,xtb)
       fteq1(3)=dlog_f13_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE25Phys3_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE25Phys3_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE25Phys3_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE25Phys3_w4_qp=integral
       return
       end function fE25Phys3_w4_qp
@@ -11207,6 +11741,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE26Phys3_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -11227,8 +11762,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(3)=dlog_f4_qp(xsb,xtb)
       fteq1(4)=dlog_f7_qp(xsb,xtb)
       fteq1(5)=dlog_f10_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE26Phys3_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE26Phys3_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE26Phys3_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE26Phys3_w4_qp=integral
       fE26Phys3_w4_qp=fE26Phys3_w4_qp+
      - +B26A4
@@ -11499,6 +12045,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE28Phys3_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -11514,8 +12061,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       CALL SetPath_st_qp(xsb,xsb0_Phys3_qp,xtb,xtb0_Phys3_qp)
       fteq1(1)=dlog_f1_qp(xsb,xtb)
       fteq1(2)=dlog_f9_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE28Phys3_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE28Phys3_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE28Phys3_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE28Phys3_w4_qp=integral
       return
       end function fE28Phys3_w4_qp
@@ -11727,6 +12285,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE29Phys3_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -11745,8 +12304,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(3)=dlog_f4_qp(xsb,xtb)
       fteq1(4)=dlog_f8_qp(xsb,xtb)
       fteq1(5)=dlog_f10_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE29Phys3_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE29Phys3_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE29Phys3_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE29Phys3_w4_qp=integral
       return
       end function fE29Phys3_w4_qp
@@ -12043,6 +12613,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE18Phys4_w3_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -12054,8 +12625,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       parameter (zeta4=
      $     1.08232323371113819151600369654116790277475095E0_16)
       CALL SetPath_st_qp(xsb,xsb0_Phys4_qp,xtb,xtb0_Phys4_qp)
-      CALL trapezoid_Cintegrator_QP(npoints,fE18Phys4_w3_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE18Phys4_w3_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE18Phys4_w3_qp_fxn,
+     $        one,integral)
+      endif
       fE18Phys4_w3_qp=integral
       return
       end function fE18Phys4_w3_qp
@@ -12191,6 +12773,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE25Phys4_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -12207,8 +12790,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(1)=dlog_f11_qp(xsb,xtb)
       fteq1(2)=dlog_f12_qp(xsb,xtb)
       fteq1(3)=dlog_f13_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE25Phys4_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE25Phys4_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE25Phys4_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE25Phys4_w4_qp=integral
       return
       end function fE25Phys4_w4_qp
@@ -12416,6 +13010,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE26Phys4_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -12436,8 +13031,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(3)=dlog_f4_qp(xsb,xtb)
       fteq1(4)=dlog_f7_qp(xsb,xtb)
       fteq1(5)=dlog_f10_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE26Phys4_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE26Phys4_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE26Phys4_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE26Phys4_w4_qp=integral
       fE26Phys4_w4_qp=fE26Phys4_w4_qp+
      - +B26A4
@@ -12708,6 +13314,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE28Phys4_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -12723,8 +13330,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       CALL SetPath_st_qp(xsb,xsb0_Phys4_qp,xtb,xtb0_Phys4_qp)
       fteq1(1)=dlog_f1_qp(xsb,xtb)
       fteq1(2)=dlog_f9_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE28Phys4_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE28Phys4_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE28Phys4_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE28Phys4_w4_qp=integral
       return
       end function fE28Phys4_w4_qp
@@ -12936,6 +13554,7 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       complex*32 fE29Phys4_w4_qp
       real*16 xsb,xtb
       complex*32 integral
+      real*16 error
       real*16 ZERO,ONE,TWO,THREE,FOUR,HALF
       parameter (ZERO=0E0_16,ONE=1E0_16,TWO=2E0_16,
      $     THREE=3E0_16,FOUR=4E0_16,HALF=0.5E0_16)
@@ -12954,8 +13573,19 @@ c     -   xsb*(xsb*(-1 + xtb)**2 - 4*xtb**2))
       fteq1(3)=dlog_f4_qp(xsb,xtb)
       fteq1(4)=dlog_f8_qp(xsb,xtb)
       fteq1(5)=dlog_f10_qp(xsb,xtb)
-      CALL trapezoid_Cintegrator_QP(npoints,fE29Phys4_w4_qp_fxn,
-     $     one,integral)
+      if(integration_method.eq.2)then
+         ! use double exponential quadrature
+         if(DEQ_init_qp.eq.0)then
+            CALL DEQuadrature_integrator_ini_qp(lenaw_qp,tiny_qp,
+     $           DEQ_eps_qp,aw_qp)
+            DEQ_init_qp=1
+         endif
+         CALL DEQuadrature_Cintegrator_qp(fE29Phys4_w4_qp_fxn,zero,
+     $        one,aw_qp,integral,error)
+      else
+         CALL trapezoid_Cintegrator_QP(npoints,fE29Phys4_w4_qp_fxn,
+     $        one,integral)
+      endif
       fE29Phys4_w4_qp=integral
       return
       end function fE29Phys4_w4_qp

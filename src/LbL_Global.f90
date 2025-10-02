@@ -125,4 +125,7 @@ MODULE LbL_Global
   ! use double or quadruple precision for two-loop amp
   LOGICAL::use_2L_DP=.FALSE.
   LOGICAL::use_2L_QP=.FALSE.
+  ! 1: use trapezoid
+  ! 2: use double exponential quadrature
+  INTEGER::grid_integration_method=2
 END MODULE LbL_Global
