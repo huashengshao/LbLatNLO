@@ -10,7 +10,7 @@
     WRITE(*,*)'|                   (VERSION 0.6)                     |'
     WRITE(*,*)'|                                                     |'
     WRITE(*,*)'|    Authors:                                         |'
-    WRITE(*,*)'|            Ajjath A.H. (LPTHE Paris)                |'
+    WRITE(*,*)'|            Ajjath A.H. (Durham)                     |'
     WRITE(*,*)'|            Ekta Chaubey (Bonn)                      |'
     WRITE(*,*)'|            Mathijs Fraaije (Bern)                   |'
     WRITE(*,*)'|            Valentin Hirschi (Bern)                  |'
