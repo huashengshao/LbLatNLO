@@ -435,7 +435,7 @@ CONTAINS
              endif
              if(improve_w_LE.EQ.-1)then
                 ! improved with low-energy expansion
-                if(xs.LE.1d0)then
+                if(xs.LE.1d0.or.(xs.LE.1.5d0.AND.(xt/xu.LT.1d-3.OR.xu/xt.LT.1d-3)))then
                    !LElimit=massive_1LAmp_xs_LElimit(log10xs,y,j)
                    !amptmp=OneLoop_HelAmp_LowEnergyLimitW(j,xs,xt,xu)
                    amptmp=OneLoopW_HelAmp_LE(j,-1,xs,xt,xu)
@@ -447,6 +447,10 @@ CONTAINS
                    !endif
                 elseif(xs.GT.1d8)then
                    amptmp=OneLoopW_HelAmp_HE(j,-1,xs,xt,xu)
+                elseif(xt/xu.LT.1d-3.OR.xu/xt.LT.1d-3)then
+                   ! we do not have Regge limit yet
+                   ! so that we set it to be zero
+                   amptmp=0d0
                 endif
              elseif(improve_w_LE.EQ.1)then
                 ! simply use the low-energy expansion
@@ -464,7 +468,7 @@ CONTAINS
              endif
              if(improve_w_LE.EQ.-1)then
                 ! improved with low-energy expansion
-                if(xs.LE.1d0)then
+                if(xs.LE.1d0.or.(xs.LE.1.5d0.AND.(xt/xu.LT.1d-3.OR.xu/xt.LT.1d-3)))then
                    !LElimit=massive_1LAmp_xs_LElimit(log10xs,y,j)
                    !amptmp=OneLoop_HelAmp_LowEnergyLimit(j,xs,xt,xu)
                    amptmp=OneLoop_HelAmp_LE(j,-1,xs,xt,xu)
@@ -477,6 +481,10 @@ CONTAINS
                    !endif
                 elseif(xs.GT.1d8)then
                    amptmp=OneLoop_HelAmp_HE(j,-1,xs,xt,xu)
+                elseif(xt/xu.LT.1d-3.OR.xu/xt.LT.1d-3)then
+                   ! we do not have Regge limit yet
+                   ! so that we set it to be zero
+                   amptmp=0d0
                 endif
              elseif(improve_w_LE.EQ.1)then
                 ! simply use the low-energy expansion
