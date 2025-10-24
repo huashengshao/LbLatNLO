@@ -153,12 +153,14 @@
       implicit none
       double complex oneloop_massive_box
       double precision s,t,m2
+      double precision sorig
       double precision u,v
       double complex betau,betav,betauv
       double precision zeta2,zero_thr
       parameter (zeta2=1.64493406684822643647241516665d0)
       parameter (zero_thr=1d-10)
       if(s.ne.0d0.and.t.ne.0d0.and.m2.ne.0d0)then
+         sorig=s
          if(dabs(s-(4d0*m2*t/(t-4d0*m2))).lt.zero_thr)then
             ! shift it a bit to avoid the singularity
             s=(4d0*m2*t/(t-4d0*m2))*(1d0+1d-8)
@@ -181,6 +183,7 @@
      $        LOG((betau+1d0)/(betauv+betau))**2
      $        -LOG((betav+1d0)/(betauv+betav))**2
          oneloop_massive_box=oneloop_massive_box*2d0/(s*t*betauv)
+         s=sorig
       elseif(t.eq.0d0.and.m2.ne.0d0.and.s.ne.0d0)then
          u=4d0*m2/(-s)
          betau=RSQRTP(1d0+u)
@@ -389,6 +392,7 @@
       implicit none
       complex*32 oneloop_massive_box_QP
       real*16 s,t,m2
+      real*16 sorig
       real*16 u,v
       complex*32 betau,betav,betauv
       real*16 zeta2,zero_thr
@@ -396,6 +400,7 @@
      $     1.6449340668482264364724151666460251892189499012068E0_16)
       parameter (zero_thr=1E-28_16)
       if(s.ne.0E0_16.and.t.ne.0E0_16.and.m2.ne.0E0_16)then
+         sorig=s
          if(abs(s-(4E0_16*m2*t/(t-4E0_16*m2))).lt.zero_thr)then
             ! shift it a bit to avoid the singularity
             s=(4E0_16*m2*t/(t-4E0_16*m2))*(1E0_16+1E-26_16)
@@ -420,6 +425,7 @@
      $        -LOG((betav+1E0_16)/(betauv+betav))**2
          oneloop_massive_box_QP=oneloop_massive_box_QP*2E0_16
      $        /(s*t*betauv)
+         s=sorig
       elseif(t.eq.0E0_16.and.m2.ne.0E0_16.and.s.ne.0E0_16)then
          u=4E0_16*m2/(-s)
          betau=RSQRTP_QP(1E0_16+u)
