@@ -1426,6 +1426,18 @@ CONTAINS
           !enddo
           return
        endif
+       if(xs.EQ.4d0)then
+          iprint=iprint+1
+          if(iprint.LE.2)then
+             write(*,*)"WARNING: hit the threshold (xs,xt)=",xs,xt
+             write(*,*)"WARNING: set the 2-loop amplitudes to zero"
+             if(iprint.eq.5)then
+                write(*,*)"INFO: will suppress the further warning"
+             endif
+          endif
+          amps(1:5)=dcmplx(0d0,0d0)
+          return
+       endif
        ! we do the interpolation from the grid
        XI(1)=DLOG10(xs)
        YI(1)=DLOG10(-2d0*xxt/xs)
@@ -1503,10 +1515,6 @@ CONTAINS
           ENDDO
           CALL lagrange_interp_2d(n_interp-1,n_interp-1,XA2,YA2,ZA2,1,XI,YI,ZI)
           ramps(nn)=ZI(1)
-          ! check NaN
-          IF(ramps(nn).NE.ramps(nn))THEN
-             ramps(nn)=0d0
-          ENDIF
        ENDDO
        DO nn=1,5
           amps(nn)=dcmplx(ramps(2*nn-1),ramps(2*nn))
