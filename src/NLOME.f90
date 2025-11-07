@@ -418,8 +418,6 @@ CONTAINS
        MQ=mass(i)
        MQ2=MQ**2
        xs=shat/MQ2
-       ! hit the threshold
-       IF(xs.EQ.4d0)CYCLE
        xt=that/MQ2
        xu=uhat/MQ2
        log10xs=DLOG10(xs)

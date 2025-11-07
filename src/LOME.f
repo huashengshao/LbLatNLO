@@ -2295,7 +2295,11 @@ c     $     (xi*xj**2*xk**2)
       double precision function rat9_UT1L(xi,xj,xk)
       implicit none
       double precision xi,xj,xk
-      rat9_UT1L=(xi-4d0)*(xi-xj)/xk
+      IF(xi.EQ.4d0)then
+         rat9_UT1L=(xi-xj)/xk
+      ELSE
+         rat9_UT1L=(xi-4d0)*(xi-xj)/xk
+      ENDIF
       end
 
       double precision function rat10_UT1L(xi,xj,xk)

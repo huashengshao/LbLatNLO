@@ -34,9 +34,21 @@
       double complex cres(NDIM),loopba(NDIM)
       double precision xs,xt,xu,logm2omu2
       xu=-xs-xt
-      cres(1)=(-2d0+loopba(1)+logm2omu2)/(xs-4d0)
-      cres(2)=(-2d0+loopba(2)+logm2omu2)/(xt-4d0)
-      cres(3)=(-2d0+loopba(3)+logm2omu2)/(xu-4d0)
+      IF(xs.EQ.4d0)THEN
+         cres(1)=(-2d0+loopba(1)+logm2omu2)
+      ELSE
+         cres(1)=(-2d0+loopba(1)+logm2omu2)/(xs-4d0)
+      ENDIF
+      IF(xt.EQ.4d0)THEN
+         cres(2)=(-2d0+loopba(2)+logm2omu2)
+      ELSE
+         cres(2)=(-2d0+loopba(2)+logm2omu2)/(xt-4d0)
+      ENDIF
+      IF(xu.EQ.4d0)THEN
+         cres(3)=(-2d0+loopba(3)+logm2omu2)
+      ELSE
+         cres(3)=(-2d0+loopba(3)+logm2omu2)/(xu-4d0)
+      ENDIF
       cres(4)=xs*loopba(4)
       cres(5)=xt*loopba(5)
       cres(6)=xu*loopba(6)
