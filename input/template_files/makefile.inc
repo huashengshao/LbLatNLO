@@ -134,7 +134,7 @@ $(objdir)LbL_Global.o $(moddir)LbL_Global.mod: $(srcdir)LbL_Global.f90
 $(objdir)coupling_global.o $(moddir)coupling_global.mod: $(srcdir)coupling_global.f90 $(moddir)qcd_coupling.mod
 	$(FC) $(FFLAGS) -c $<
 
-$(objdir)evaluate_couplings.o $(moddir)evaluate_couplings.mod: $(srcdir)evaluate_couplings.f90 $(moddir)LbL_Global.mod $(moddir)global_constants.mod $(moddir)qcd_constants.mod $(moddir)coupling_global.mod
+$(objdir)evaluate_couplings.o $(moddir)evaluate_couplings.mod: $(srcdir)evaluate_couplings.f90 $(moddir)LbL_Global.mod $(moddir)global_constants.mod $(moddir)qcd_constants.mod $(moddir)Func_PSI.mod $(moddir)nielsen_generalized_polylog_wrapper.mod $(moddir)coupling_global.mod
 	$(FC) $(FFLAGS) -c $<
 
 $(objdir)global_constants.o $(moddir)global_constants.mod: $(srcdir)global_constants.f90

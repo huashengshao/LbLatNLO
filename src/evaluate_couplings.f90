@@ -103,8 +103,8 @@ CONTAINS
     REAL(KIND(1d0))::ALPHAEW
     REAL(KIND(1d0)),INTENT(IN)::Q
     REAL(KIND(1d0)),SAVE::ALPHAEW_SAVE
-    REAL(KIND(1d0)),SAVE::DalphalepMZ=0d0,DalphahadMZ=0d0
-    REAL(KIND(1d0))::DalphalepQ,DDalphahad
+    REAL(KIND(1d0)),SAVE::DalphalepMZ=0d0,DalphahadMZ=0d0,DalphatopMZ=0d0
+    REAL(KIND(1d0))::DalphalepQ,DDalphahad,DalphatopQ
     INTEGER,SAVE::init=0
     REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
     IF(init.EQ.0)THEN
@@ -119,6 +119,7 @@ CONTAINS
           ALPHAEW_SAVE=0d0
           DalphalepMZ=DeltaAlphaLep(zmass_PDG)
           DalphahadMZ=DeltaAlphaHad(zmass_PDG)
+          DalphatopMZ=DeltaAlphaTop(zmass_PDG)
        ENDIF
        init=1
     ENDIF
@@ -136,8 +137,11 @@ CONTAINS
        ! where Delta alpha_{had}(MZ)-Delta alpha_{had}(Q) we use the perturbative one-loop results [insensitive to light quark mass when Q > 1 GeV]
        DalphalepQ=DeltaAlphaLep(Q)
        DDalphahad=DalphahadMZ-DeltaAlphaHad(Q)
-       ALPHAEW=1d0/alphaMZm1*(1d0-DalphahadMZ_PDG-DalphalepMZ)&
-            /(1d0-DalphahadMZ_PDG-DalphalepQ+DDalphahad)
+       DalphaTopQ=DeltaAlphaTop(Q)
+       !ALPHAEW=1d0/alphaMZm1*(1d0-DalphahadMZ_PDG-DalphaTopMZ-DalphalepMZ)&
+       !     /(1d0-DalphahadMZ_PDG-DalphalepQ-DalphaTopQ+DDalphahad)
+       ! same as above
+       ALPHAEW=1d0/alphaemm1/(1d0-DalphahadMZ_PDG-DalphalepQ-DalphaTopQ+DDalphahad)
     ENDIF
   END FUNCTION ALPHAEW
 
@@ -158,35 +162,172 @@ CONTAINS
     RETURN
   END FUNCTION ReSIGMAAA
 
+  FUNCTION ReSIGMAAA2L(Q,M)
+    ! two-loop perturbation result of
+    ! ReSigma_AA(Q)-Sigma_AA(0) for a given fermion
+    ! It has been dropped alpha**2/(Pi**2)*Ncf*Qf**4 for NLO QED
+    !                     alpha*aS/(Pi**2)*Ncf*Qf**2*CFf for NLO QCD
+    IMPLICIT NONE
+    REAL(KIND(1d0))::ReSIGMAAA2L
+    REAL(KIND(1d0)),INTENT(IN)::Q,M
+    COMPLEX(KIND(1d0))::SIGMAAA2L
+    REAL(KIND(1d0))::MQ2Q2
+    COMPLEX(KIND(1d0))::vq,vqponeovervqmone,phi1,phi2,phi3,LL
+    REAL(KIND(1d0)),PARAMETER::zeta3=1.20205690315959428539973816151d0
+    MQ2Q2=M**2/Q**2
+    vq=SQRT(DCMPLX(1d0-4d0*MQ2Q2,0d0))
+    vqponeovervqmone=(vq-1d0)/(vq+1d0)
+    phi1=phin(1,vqponeovervqmone)
+    phi2=phin(2,vqponeovervqmone)
+    phi3=phin(3,vqponeovervqmone)
+    LL=LOG(vqponeovervqmone)
+    SIGMAAA2L=(vq**4-2d0*vq**2-3d0)/12d0*(phi1*LL**2-4d0*phi2*LL+6d0*phi3+3d0*zeta3)&
+         +(3d0*vq-vq**3)/12d0*(4d0*phi1*LL-4d0*phi2+3d0*LL**2)&
+         +(5d0*vq-3d0*vq**3)/8d0*LL+(7d0*vq**4-22d0*vq**2-33d0)/96d0*LL**2&
+         -13d0*(vq**2-1d0)/24d0+5d0/24d0
+    ReSIGMAAA2L=DREAL(SIGMAAA2L)
+    RETURN
+  END FUNCTION ReSIGMAAA2L
+
   FUNCTION DeltaAlphaLep(Q)
     USE LbL_Global
-    ! one-loop
+    ! one-loop, two loop QED
     ! Delta alpha_{lep}(Q)
     IMPLICIT NONE
     REAL(KIND(1d0))::DeltaAlphaLep
+    REAL(KIND(1d0))::DeltaAlphaLep1L,DeltaAlphaLep2L
     REAL(KIND(1d0)),INTENT(IN)::Q
     REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
-    DeltaAlphaLep=ReSIGMAAA(Q,emass_PDG)
-    DeltaAlphaLep=DeltaAlphaLep+ReSIGMAAA(Q,mumass_PDG)
-    DeltaAlphaLep=DeltaAlphaLep+ReSIGMAAA(Q,taumass_PDG)
-    DeltaAlphaLep=DeltaAlphaLep*(-1d0/(3d0*pipi*alphaemm1))
+    DeltaAlphaLep1L=ReSIGMAAA(Q,emass_PDG)
+    DeltaAlphaLep1L=DeltaAlphaLep1L+ReSIGMAAA(Q,mumass_PDG)
+    DeltaAlphaLep1L=DeltaAlphaLep1L+ReSIGMAAA(Q,taumass_PDG)
+    DeltaAlphaLep1L=DeltaAlphaLep1L*(-1d0/(3d0*pipi*alphaemm1))
+    IF(alpha_nloop.EQ.1)THEN
+       DeltaAlphaLep=DeltaAlphaLep1L
+       RETURN
+    ENDIF
+    DeltaAlphaLep2L=ReSIGMAAA2L(Q,emass_PDG)
+    DeltaAlphaLep2L=DeltaAlphaLep2L+ReSIGMAAA2L(Q,mumass_PDG)
+    DeltaAlphaLep2L=DeltaAlphaLep2L+ReSIGMAAA2L(Q,taumass_PDG)
+    DeltaAlphaLep2L=DeltaAlphaLep2L*(-1d0/(pipi*alphaemm1)**2)
+    DeltaAlphaLep=DeltaAlphaLep1L+DeltaAlphaLep2L
     RETURN
   END FUNCTION DeltaAlphaLep
 
   FUNCTION DeltaAlphaHad(Q)
     use LbL_Global
-    ! one-loop
+    ! one-loop, two loop QCD and QED
     ! Delta alpha_{had}(Q) [only 5 quark flavours]
     IMPLICIT NONE
     REAL(KIND(1d0))::DeltaAlphaHad
+    REAL(KIND(1d0))::DeltaAlphaHad1L,DeltaAlphaHad2L
+    REAL(KIND(1d0))::DeltaAlphaHad2LQCD,DeltaAlphaHad2LQED
     REAL(KIND(1d0)),INTENT(IN)::Q
     REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
-    DeltaAlphaHad=ReSIGMAAA(Q,umass_PDG)*(2d0/3d0)**2
-    DeltaAlphaHad=DeltaAlphaHad+ReSIGMAAA(Q,dmass_PDG)*(-1d0/3d0)**2
-    DeltaAlphaHad=DeltaAlphaHad+ReSIGMAAA(Q,smass_PDG)*(-1d0/3d0)**2
-    DeltaAlphaHad=DeltaAlphaHad+ReSIGMAAA(Q,cmass_PDG)*(2d0/3d0)**2
-    DeltaAlphaHad=DeltaAlphaHad+ReSIGMAAA(Q,bmass_PDG)*(-1d0/3d0)**2
-    DeltaAlphaHad=DeltaAlphaHad*(-1d0/(pipi*alphaemm1))
+    REAL(KIND(1d0)),PARAMETER::CF=4d0/3d0
+    REAL(KIND(1d0))::aSatQ
+    DeltaAlphaHad1L=ReSIGMAAA(Q,umass_PDG)*(2d0/3d0)**2
+    DeltaAlphaHad1L=DeltaAlphaHad1L+ReSIGMAAA(Q,dmass_PDG)*(-1d0/3d0)**2
+    DeltaAlphaHad1L=DeltaAlphaHad1L+ReSIGMAAA(Q,smass_PDG)*(-1d0/3d0)**2
+    DeltaAlphaHad1L=DeltaAlphaHad1L+ReSIGMAAA(Q,cmass_PDG)*(2d0/3d0)**2
+    DeltaAlphaHad1L=DeltaAlphaHad1L+ReSIGMAAA(Q,bmass_PDG)*(-1d0/3d0)**2
+    DeltaAlphaHad1L=DeltaAlphaHad1L*(-1d0/(pipi*alphaemm1))
+    IF(alpha_nloop.EQ.1)THEN
+       DeltaAlphaHad=DeltaAlphaHad1L
+       RETURN
+    ENDIF
+    IF(Q.GE.1d0)THEN
+       aSatQ=ALPHAS(Q)
+    ELSE
+       ! turn off two-loop QCD below 1 GeV
+       aSatQ=0d0
+    ENDIF
+    DeltaAlphaHad2L=ReSIGMAAA2L(Q,umass_PDG)+ReSIGMAAA2L(Q,cmass_PDG)
+    DeltaAlphaHad2LQED=DeltaAlphaHad2L*(2d0/3d0)**4*(-3d0)/(pipi*alphaemm1)**2
+    DeltaAlphaHad2LQCD=DeltaAlphaHad2L*(2d0/3d0)**2*(-3d0)*CF*aSatQ/(pipi**2*alphaemm1)
+    DeltaAlphaHad2L=ReSIGMAAA2L(Q,dmass_PDG)+ReSIGMAAA2L(Q,smass_PDG)&
+         +ReSIGMAAA2L(Q,bmass_PDG)
+    DeltaAlphaHad2LQED=DeltaAlphaHad2LQED+&
+         DeltaAlphaHad2L*(-1d0/3d0)**4*(-3d0)/(pipi*alphaemm1)**2
+    DeltaAlphaHad2LQCD=DeltaAlphaHad2LQCD+&
+         DeltaAlphaHad2L*(-1d0/3d0)**2*(-3d0)*CF*aSatQ/(pipi**2*alphaemm1)
+    DeltaAlphaHad=DeltaAlphaHad1L+DeltaAlphaHad2LQED+DeltaAlphaHad2LQCD
     RETURN
   END FUNCTION DeltaAlphaHad
+
+  FUNCTION DeltaAlphaTop(Q)
+    use LbL_Global
+    ! one-loop, two-loop QED and QCD
+    ! Delta alpha_{t}(Q)
+    IMPLICIT NONE
+    REAL(KIND(1d0))::DeltaAlphaTop
+    REAL(KIND(1d0))::DeltaAlphaTop1L,DeltaAlphaTop2L
+    REAL(KIND(1d0))::DeltaAlphaTop2LQCD,DeltaAlphaTop2LQED
+    REAL(KIND(1d0)),INTENT(IN)::Q
+    REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
+    REAL(KIND(1d0)),PARAMETER::CF=4d0/3d0
+    REAL(KIND(1d0))::aSatQ
+    DeltaAlphaTop1L=ReSIGMAAA(Q,tmass_PDG)*(2d0/3d0)**2
+    DeltaAlphaTop1L=DeltaAlphaTop1L*(-1d0/(pipi*alphaemm1))
+    IF(alpha_nloop.EQ.1)THEN
+       DeltaAlphaTop=DeltaAlphaTop1L
+       RETURN
+    ENDIF
+    IF(Q.GE.1d0)THEN
+       aSatQ=ALPHAS(Q)
+    ELSE
+       ! turn off two-loop QCD below 1 GeV
+       aSatQ=0d0
+    ENDIF
+    DeltaAlphaTop2L=ReSIGMAAA2L(Q,tmass_PDG)
+    DeltaAlphaTop2LQED=DeltaAlphaTop2L*(2d0/3d0)**4*(-3d0)/(pipi*alphaemm1)**2
+    DeltaAlphaTop2LQCD=DeltaAlphaTop2L*(2d0/3d0)**2*(-3d0)*CF*aSatQ/(pipi**2*alphaemm1)
+    DeltaAlphaTop=DeltaAlphaTop1L+DeltaAlphaTop2LQED+DeltaAlphaTop2LQCD
+    RETURN
+  END FUNCTION DeltaAlphaTop
+
+  SUBROUTINE Evaluate_DalphahadMZ(alphaemm1,alphaMZm1,MZ,DalphahadMZ)
+    ! evaluate Delta alpha_{had}^{(5)}(mZ**2) from input
+    ! alpha(0)=1/alphaemm1, alphaMZ=1/alphaMZm1
+    IMPLICIT NONE
+    REAL(KIND(1d0)),INTENT(IN)::alphaemm1,alphaMZm1,MZ
+    REAL(KIND(1d0)),INTENT(OUT)::DalphahadMZ
+    REAL(KIND(1d0))::DeltaAlphaLepMZ,DeltaAlphaTopMZ
+    DeltaAlphaLepMZ=DeltaAlphaLep(MZ)
+    DeltaAlphaTopMZ=DeltaAlphaTop(MZ)
+    DalphahadMZ=1d0-DeltaAlphaLepMZ-DeltaAlphaTopMZ-alphaMZm1/alphaemm1
+    RETURN
+  END SUBROUTINE Evaluate_DalphahadMZ
+
+  FUNCTION phin(n,x)
+    ! phin(n,x)=Lin(x)+2Lin(-x)
+    USE Func_PSI
+    USE nielsen_generalized_polylog_wrapper
+    IMPLICIT NONE
+    INTEGER,INTENT(IN)::n
+    COMPLEX(KIND(1d0)),INTENT(IN)::x
+    COMPLEX(KIND(1d0))::phin
+    IF(n.LE.0.OR.n.GE.7)THEN
+       WRITE(*,*)"ERROR: n<=0 or n>=7"
+       STOP
+    ENDIF
+    IF(n.EQ.1)THEN
+       ! Li1(x)=-log(1-x)
+       phin=-log(1d0-x)-2d0*log(1d0+x)
+    ELSEIF(n.EQ.2)THEN
+       phin=li2(x)+2d0*li2(-x)
+    ELSEIF(n.EQ.3)THEN
+       phin=cdli3(x)+2d0*cdli3(-x)
+    ELSEIF(n.EQ.4)THEN
+       phin=cdli4(x)+2d0*cdli4(-x)
+    ELSEIF(n.EQ.5)THEN
+       phin=cdli5(x)+2d0*cdli5(-x)
+    ELSEIF(n.EQ.6)THEN
+       phin=cdli6(x)+2d0*cdli6(-x)
+    ELSE
+       WRITE(*,*)"ERROR: cannot reach here"
+       STOP
+    ENDIF
+    RETURN
+  END FUNCTION phin
 END MODULE evaluate_couplings

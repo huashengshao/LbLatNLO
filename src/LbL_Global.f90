@@ -41,11 +41,12 @@ MODULE LbL_Global
   REAL(KIND(1d0))::alphasMZ=0.118d0
   INTEGER::alphas_nloop=2
   REAL(KIND(1d0))::Gfermi=1.1663787d-5
-  REAL(KIND(1d0))::alphaMZm1=127.955d0
+  REAL(KIND(1d0))::alphaMZm1=128.94d0
   REAL(KIND(1d0))::DalphahadMZ_PDG=0.02766d0 ! 5 flavour number scheme
                                              ! uncertainty is +-0.00007 
                                              ! (page 4 in https://pdg.lbl.gov/2020/reviews/rpp2020-rev-standard-model.pdf)
   INTEGER::alpha_scheme=0
+  INTEGER::alpha_nloop=2 ! how many loop run when alpha_scheme=2
   INTEGER::scale=0
   REAL(KIND(1d0))::fscalevalue=10d0
   REAL(KIND(1d0))::muR_over_ref=1d0

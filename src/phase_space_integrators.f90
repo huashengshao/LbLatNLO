@@ -19,6 +19,7 @@ CONTAINS
     USE coupling_global
     USE GPL_wrapper
     USE ElasticPhotonPhotonFlux
+    USE evaluate_couplings
     IMPLICIT NONE
     INTEGER::i,i1,j1,k1,s1x
     INTEGER::nh,innum,outnum
@@ -143,6 +144,16 @@ CONTAINS
        IF(alpha_scheme.LT.0.OR.alpha_scheme.GT.2)THEN
           WRITE(*,*)"ERROR: alpha_scheme can only be from 0 to 2"
           STOP
+       ENDIF
+       IF(alpha_scheme.EQ.2)THEN
+          CALL ReadElem_integer('alpha_nloop',alpha_nloop)
+          IF(alpha_nloop.NE.1.AND.alpha_nloop.NE.2)THEN
+             WRITE(*,*)"ERROR: the alpha RG running can only be from 1 to 2"
+             STOP
+          ENDIF
+          ! evaluate Delta alpha^{(5)}_had from alpha(MZ) and alpha(0)
+          Call Evaluate_DalphahadMZ(alphaemm1,alphaMZm1,zmass_PDG,&
+               DalphahadMZ_PDG)
        ENDIF
     ENDIF
 
