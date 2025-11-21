@@ -117,6 +117,18 @@ CONTAINS
                *(zmass_PDG**2-wmass_PDG**2)/zmass_PDG**2/pipi
        ELSE
           ALPHAEW_SAVE=0d0
+          ! these values are tunned to make sure
+          ! when Q -> 0 we have alpha -> 1/137.036
+          IF(alpha_nloop.EQ.1)THEN
+             umass_PDG=43d-3
+             dmass_PDG=43d-3
+          ELSEIF(alpha_nloop.EQ.2)THEN
+             umass_PDG=83d-3
+             dmass_PDG=83d-3
+          ELSE
+             WRITE(*,*)"ERROR: unknown alpha_nloop in ALPHAEW: ", alpha_nloop
+             STOP
+          ENDIF
           DalphalepMZ=DeltaAlphaLep(zmass_PDG)
           DalphahadMZ=DeltaAlphaHad(zmass_PDG)
           DalphatopMZ=DeltaAlphaTop(zmass_PDG)
@@ -156,8 +168,23 @@ CONTAINS
     REAL(KIND(1d0))::MQ2Q2
     COMPLEX(KIND(1d0))::sqrtt
     MQ2Q2=M**2/Q**2
-    sqrtt=SQRT(DCMPLX(1d0-4d0*MQ2Q2,0d0))
-    SIGMAAA=5d0/3d0+4d0*MQ2Q2+sqrtt*(1d0+2d0*MQ2Q2)*LOG((sqrtt-1d0)/(sqrtt+1d0))
+    IF(4d0*MQ2Q2.EQ.1d0)THEN
+       SIGMAAA=8d0/3d0
+       RETURN
+    ENDIF
+    IF(MQ2Q2.GT.1d-10.AND.MQ2Q2.LT.1d5)THEN
+       sqrtt=SQRT(DCMPLX(1d0-4d0*MQ2Q2,0d0))
+       SIGMAAA=5d0/3d0+4d0*MQ2Q2+sqrtt*(1d0+2d0*MQ2Q2)*LOG((sqrtt-1d0)/(sqrtt+1d0))
+    ELSEIF(MQ2Q2.LE.1d-10)THEN
+       ! use the expansion when MQ2Q2 -> 0
+       SIGMAAA=5d0/3d0+6d0*MQ2Q2+LOG(MQ2Q2)
+    ELSEIF(MQ2Q2.GE.1d5)THEN
+       ! use the expansion when MQ2Q2 -> infinity
+       SIGMAAA=1d0/(5d0*MQ2Q2)
+    ELSE
+       WRITE(*,*)"ERROR: cannot reach here SIGMAAA"
+       STOP
+    ENDIF
     ReSIGMAAA=DREAL(SIGMAAA)
     RETURN
   END FUNCTION ReSIGMAAA
@@ -175,16 +202,33 @@ CONTAINS
     COMPLEX(KIND(1d0))::vq,vqponeovervqmone,phi1,phi2,phi3,LL
     REAL(KIND(1d0)),PARAMETER::zeta3=1.20205690315959428539973816151d0
     MQ2Q2=M**2/Q**2
-    vq=SQRT(DCMPLX(1d0-4d0*MQ2Q2,0d0))
-    vqponeovervqmone=(vq-1d0)/(vq+1d0)
-    phi1=phin(1,vqponeovervqmone)
-    phi2=phin(2,vqponeovervqmone)
-    phi3=phin(3,vqponeovervqmone)
-    LL=LOG(vqponeovervqmone)
-    SIGMAAA2L=(vq**4-2d0*vq**2-3d0)/12d0*(phi1*LL**2-4d0*phi2*LL+6d0*phi3+3d0*zeta3)&
-         +(3d0*vq-vq**3)/12d0*(4d0*phi1*LL-4d0*phi2+3d0*LL**2)&
-         +(5d0*vq-3d0*vq**3)/8d0*LL+(7d0*vq**4-22d0*vq**2-33d0)/96d0*LL**2&
-         -13d0*(vq**2-1d0)/24d0+5d0/24d0
+    IF(4d0*MQ2Q2.EQ.1d0)THEN
+       ! hit the threshold in vacuum polarization function
+       ! return zero
+       ReSIGMAAA2L=0d0
+       RETURN
+    ENDIF
+    IF(MQ2Q2.GT.1d-10.AND.MQ2Q2.LT.1d3)THEN
+       vq=SQRT(DCMPLX(1d0-4d0*MQ2Q2,0d0))
+       vqponeovervqmone=(vq-1d0)/(vq+1d0)
+       phi1=phin(1,vqponeovervqmone)
+       phi2=phin(2,vqponeovervqmone)
+       phi3=phin(3,vqponeovervqmone)
+       LL=LOG(vqponeovervqmone)
+       SIGMAAA2L=(vq**4-2d0*vq**2-3d0)/12d0*(phi1*LL**2-4d0*phi2*LL+6d0*phi3+3d0*zeta3)&
+            +(3d0*vq-vq**3)/12d0*(4d0*phi1*LL-4d0*phi2+3d0*LL**2)&
+            +(5d0*vq-3d0*vq**3)/8d0*LL+(7d0*vq**4-22d0*vq**2-33d0)/96d0*LL**2&
+            -13d0*(vq**2-1d0)/24d0+5d0/24d0
+    ELSEIF(MQ2Q2.LE.1d-10)THEN
+       ! use the expansion when MQ2Q2 -> 0
+       SIGMAAA2L=5d0/24d0+(0.25d0+3d0*MQ2Q2)*LOG(MQ2Q2)-zeta3
+    ELSEIF(MQ2Q2.GE.1d3)THEN
+       ! use the expansion when MQ2Q2 -> infinity
+       SIGMAAA2L=41d0/162d0/MQ2Q2
+    ELSE
+       WRITE(*,*)"ERROR: cannot reach here SIGMAAA2L"
+       STOP
+    ENDIF
     ReSIGMAAA2L=DREAL(SIGMAAA2L)
     RETURN
   END FUNCTION ReSIGMAAA2L
