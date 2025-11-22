@@ -165,22 +165,27 @@ CONTAINS
     REAL(KIND(1d0))::ReSIGMAAA
     REAL(KIND(1d0)),INTENT(IN)::Q,M
     COMPLEX(KIND(1d0))::SIGMAAA
-    REAL(KIND(1d0))::MQ2Q2
+    REAL(KIND(1d0))::MQ2Q2,LOGMQ2Q2
     COMPLEX(KIND(1d0))::sqrtt
     MQ2Q2=M**2/Q**2
     IF(4d0*MQ2Q2.EQ.1d0)THEN
        SIGMAAA=8d0/3d0
        RETURN
     ENDIF
-    IF(MQ2Q2.GT.1d-10.AND.MQ2Q2.LT.1d5)THEN
+    IF(MQ2Q2.GT.1d-8.AND.MQ2Q2.LT.1d5)THEN
        sqrtt=SQRT(DCMPLX(1d0-4d0*MQ2Q2,0d0))
        SIGMAAA=5d0/3d0+4d0*MQ2Q2+sqrtt*(1d0+2d0*MQ2Q2)*LOG((sqrtt-1d0)/(sqrtt+1d0))
-    ELSEIF(MQ2Q2.LE.1d-10)THEN
-       ! use the expansion when MQ2Q2 -> 0
-       SIGMAAA=5d0/3d0+6d0*MQ2Q2+LOG(MQ2Q2)
+    ELSEIF(MQ2Q2.LE.1d-8)THEN
+       ! use the HE expansion when MQ2Q2 -> 0
+       LOGMQ2Q2=LOG(MQ2Q2)
+       SIGMAAA=LOGMQ2Q2+5d0/3d0+6d0*MQ2Q2+MQ2Q2**2*(3d0-6d0*LOGMQ2Q2)&
+            +MQ2Q2**3*(-16d0/3d0-8d0*LOGMQ2Q2)&
+            +MQ2Q2**4*(-33d0/2d0-18d0*LOGMQ2Q2)
     ELSEIF(MQ2Q2.GE.1d5)THEN
-       ! use the expansion when MQ2Q2 -> infinity
-       SIGMAAA=1d0/(5d0*MQ2Q2)
+       ! use the LE expansion when MQ2Q2 -> infinity
+       SIGMAAA=1d0/(5d0*MQ2Q2)+3d0/140d0/MQ2Q2**2+1d0/315d0/MQ2Q2**3&
+            +1d0/1848d0/MQ2Q2**4+1d0/10010d0/MQ2Q2**5+1d0/51480d0/MQ2Q2**6&
+            +1d0/255255d0/MQ2Q2**7
     ELSE
        WRITE(*,*)"ERROR: cannot reach here SIGMAAA"
        STOP
@@ -198,8 +203,9 @@ CONTAINS
     REAL(KIND(1d0))::ReSIGMAAA2L
     REAL(KIND(1d0)),INTENT(IN)::Q,M
     COMPLEX(KIND(1d0))::SIGMAAA2L
-    REAL(KIND(1d0))::MQ2Q2
+    REAL(KIND(1d0))::MQ2Q2,LOGMQ2Q2
     COMPLEX(KIND(1d0))::vq,vqponeovervqmone,phi1,phi2,phi3,LL
+    REAL(KIND(1d0)),PARAMETER::zeta2=1.64493406684822643647241516665d0
     REAL(KIND(1d0)),PARAMETER::zeta3=1.20205690315959428539973816151d0
     MQ2Q2=M**2/Q**2
     IF(4d0*MQ2Q2.EQ.1d0)THEN
@@ -208,7 +214,7 @@ CONTAINS
        ReSIGMAAA2L=0d0
        RETURN
     ENDIF
-    IF(MQ2Q2.GT.1d-10.AND.MQ2Q2.LT.1d3)THEN
+    IF(MQ2Q2.GT.1d-8.AND.MQ2Q2.LT.1d3)THEN
        vq=SQRT(DCMPLX(1d0-4d0*MQ2Q2,0d0))
        vqponeovervqmone=(vq-1d0)/(vq+1d0)
        phi1=phin(1,vqponeovervqmone)
@@ -219,12 +225,19 @@ CONTAINS
             +(3d0*vq-vq**3)/12d0*(4d0*phi1*LL-4d0*phi2+3d0*LL**2)&
             +(5d0*vq-3d0*vq**3)/8d0*LL+(7d0*vq**4-22d0*vq**2-33d0)/96d0*LL**2&
             -13d0*(vq**2-1d0)/24d0+5d0/24d0
-    ELSEIF(MQ2Q2.LE.1d-10)THEN
-       ! use the expansion when MQ2Q2 -> 0
-       SIGMAAA2L=5d0/24d0+(0.25d0+3d0*MQ2Q2)*LOG(MQ2Q2)-zeta3
+    ELSEIF(MQ2Q2.LE.1d-8)THEN
+       ! use the HE expansion when MQ2Q2 -> 0
+       LOGMQ2Q2=LOG(MQ2Q2)
+       SIGMAAA2L=5d0/24d0+0.25d0*LOGMQ2Q2-zeta3+3d0*MQ2Q2*LOGMQ2Q2&
+            +MQ2Q2**2*(1d0/6d0+18d0*zeta2+4d0*zeta3+2.5d0*LOGMQ2Q2&
+            -3d0*LOGMQ2Q2**2)+MQ2Q2**3*(248d0/27d0+116d0/3d0*zeta2&
+            -188d0/27d0*LOGMQ2Q2-58d0/9d0*LOGMQ2Q2**2)
     ELSEIF(MQ2Q2.GE.1d3)THEN
-       ! use the expansion when MQ2Q2 -> infinity
-       SIGMAAA2L=41d0/162d0/MQ2Q2
+       ! use the LE expansion when MQ2Q2 -> infinity
+       SIGMAAA2L=41d0/162d0/MQ2Q2+449d0/10800d0/MQ2Q2**2&
+            +62479d0/7938000d0/MQ2Q2**3+25993d0/16329600d0/MQ2Q2**4&
+            +6756019d0/20170458000d0/MQ2Q2**5&
+            +338452951d0/4674935865600d0/MQ2Q2**6
     ELSE
        WRITE(*,*)"ERROR: cannot reach here SIGMAAA2L"
        STOP
