@@ -44,10 +44,10 @@ Gfermi        1.1663787d-5 # Gfermi only alpha_scheme=1
 alphaMZm1     128.94d0     # alpha(MZ)**(-1) with alpha_scheme=2
 alpha_scheme  0            # 0: use alpha(0) for the QED corrections
                            # 1: use Gmu sheme for the QED corrections
-                           # 2: use alpha(mu) scheme from alpha(MZ)
+                           # 2: use on-shell alpha(mu) scheme from alpha(MZ)
                            # for the QED corrections
 alpha_nloop   2            # how many loops (1 or 2) run of alpha
-                           # when alpha_scheme=2
+                           # when alpha_scheme=2 (W loop is only at 1 loop)
 Scale         0            # renormalisation scale. 
                            #  0: fixed scale; 
                            #  1: pT of photon; 

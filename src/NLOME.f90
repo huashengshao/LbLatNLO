@@ -82,6 +82,16 @@ CONTAINS
     parameter (pipi=3.14159265358979323846264338328d0)
     double precision alpham1,as_cen,as_up,as_down
     double precision aew_cen,aew_up,aew_down
+    !OPEN(UNIT=20333,FILE="alpha.dat")
+    !DO i_mass=-10,10
+    !   DO i_massless=0,90
+    !      log10xs=10d0**(i_mass-1)*(0.1d0+DBLE(i_massless)/100d0)
+    !      y=ALPHAEW(log10xs)
+    !      WRITE(20333,*)log10xs,y
+    !   ENDDO
+    !ENDDO
+    !CLOSE(UNIT=20333)
+    !STOP
     shat=sumdot2(pborn(1,0:3),pborn(2,0:3),1d0)
     that=sumdot2(pborn(2,0:3),pborn(3,0:3),-1d0)
     uhat=sumdot2(pborn(1,0:3),pborn(3,0:3),-1d0)

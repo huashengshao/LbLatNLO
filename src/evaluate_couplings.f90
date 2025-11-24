@@ -103,8 +103,9 @@ CONTAINS
     REAL(KIND(1d0))::ALPHAEW
     REAL(KIND(1d0)),INTENT(IN)::Q
     REAL(KIND(1d0)),SAVE::ALPHAEW_SAVE
-    REAL(KIND(1d0)),SAVE::DalphalepMZ=0d0,DalphahadMZ=0d0,DalphatopMZ=0d0
-    REAL(KIND(1d0))::DalphalepQ,DDalphahad,DalphatopQ
+    REAL(KIND(1d0)),SAVE::DalphalepMZ=0d0,DalphahadMZ=0d0,&
+         DalphatopMZ=0d0,DalphaWMZ=0d0
+    REAL(KIND(1d0))::DalphalepQ,DDalphahad,DalphatopQ,DalphaWQ
     INTEGER,SAVE::init=0
     REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
     IF(init.EQ.0)THEN
@@ -120,11 +121,15 @@ CONTAINS
           ! these values are tunned to make sure
           ! when Q -> 0 we have alpha -> 1/137.036
           IF(alpha_nloop.EQ.1)THEN
-             umass_PDG=43d-3
-             dmass_PDG=43d-3
+             !umass_PDG=43d-3
+             !dmass_PDG=43d-3
+             umass_PDG=53.56d-3
+             dmass_PDG=53.56d-3
           ELSEIF(alpha_nloop.EQ.2)THEN
-             umass_PDG=83d-3
-             dmass_PDG=83d-3
+             !umass_PDG=83d-3
+             !dmass_PDG=83d-3
+             umass_PDG=101.7d-3
+             dmass_PDG=101.7d-3
           ELSE
              WRITE(*,*)"ERROR: unknown alpha_nloop in ALPHAEW: ", alpha_nloop
              STOP
@@ -132,6 +137,7 @@ CONTAINS
           DalphalepMZ=DeltaAlphaLep(zmass_PDG)
           DalphahadMZ=DeltaAlphaHad(zmass_PDG)
           DalphatopMZ=DeltaAlphaTop(zmass_PDG)
+          DalphaWMZ=DeltaAlphaW(zmass_PDG)
        ENDIF
        init=1
     ENDIF
@@ -150,10 +156,11 @@ CONTAINS
        DalphalepQ=DeltaAlphaLep(Q)
        DDalphahad=DalphahadMZ-DeltaAlphaHad(Q)
        DalphaTopQ=DeltaAlphaTop(Q)
+       DalphaWQ=DeltaAlphaW(Q)
        !ALPHAEW=1d0/alphaMZm1*(1d0-DalphahadMZ_PDG-DalphaTopMZ-DalphalepMZ)&
        !     /(1d0-DalphahadMZ_PDG-DalphalepQ-DalphaTopQ+DDalphahad)
        ! same as above
-       ALPHAEW=1d0/alphaemm1/(1d0-DalphahadMZ_PDG-DalphalepQ-DalphaTopQ+DDalphahad)
+       ALPHAEW=1d0/alphaemm1/(1d0-DalphahadMZ_PDG-DalphalepQ-DalphaTopQ-DalphaWQ+DDalphahad)
     ENDIF
   END FUNCTION ALPHAEW
 
@@ -169,7 +176,7 @@ CONTAINS
     COMPLEX(KIND(1d0))::sqrtt
     MQ2Q2=M**2/Q**2
     IF(4d0*MQ2Q2.EQ.1d0)THEN
-       SIGMAAA=8d0/3d0
+       ReSIGMAAA=8d0/3d0
        RETURN
     ENDIF
     IF(MQ2Q2.GT.1d-8.AND.MQ2Q2.LT.1d5)THEN
@@ -187,7 +194,7 @@ CONTAINS
             +1d0/1848d0/MQ2Q2**4+1d0/10010d0/MQ2Q2**5+1d0/51480d0/MQ2Q2**6&
             +1d0/255255d0/MQ2Q2**7
     ELSE
-       WRITE(*,*)"ERROR: cannot reach here SIGMAAA"
+       WRITE(*,*)"ERROR: cannot reach here ReSIGMAAA"
        STOP
     ENDIF
     ReSIGMAAA=DREAL(SIGMAAA)
@@ -239,12 +246,52 @@ CONTAINS
             +6756019d0/20170458000d0/MQ2Q2**5&
             +338452951d0/4674935865600d0/MQ2Q2**6
     ELSE
-       WRITE(*,*)"ERROR: cannot reach here SIGMAAA2L"
+       WRITE(*,*)"ERROR: cannot reach here ReSIGMAAA2L"
        STOP
     ENDIF
     ReSIGMAAA2L=DREAL(SIGMAAA2L)
     RETURN
   END FUNCTION ReSIGMAAA2L
+
+  FUNCTION ReSIGMAAA1LW(Q,M)
+    ! one-loop perturbation result of
+    ! ReSigma_AA(Q)-Sigma_AA(0) for the W boson
+    ! It has been dropped alpha/Pi
+    IMPLICIT NONE
+    REAL(KIND(1d0))::ReSIGMAAA1LW
+    REAL(KIND(1d0)),INTENT(IN)::Q,M
+    COMPLEX(KIND(1d0))::SIGMAAA
+    REAL(KIND(1d0))::MQ2Q2,LOGMQ2Q2
+    COMPLEX(KIND(1d0))::sqrtt
+    MQ2Q2=M**2/Q**2
+    IF(4d0*MQ2Q2.EQ.1d0)THEN
+       ReSIGMAAA1LW=-11d0/6d0
+       RETURN
+    ENDIF
+    IF(MQ2Q2.GT.1d-8.AND.MQ2Q2.LT.1d5)THEN
+       sqrtt=SQRT(DCMPLX(1d0-4d0*MQ2Q2,0d0))
+       SIGMAAA=-4d0/3d0-2d0*MQ2Q2+sqrtt*(-3d0/4d0-MQ2Q2)*LOG((sqrtt-1d0)/(sqrtt+1d0))
+    ELSEIF(MQ2Q2.LE.1d-8)THEN
+       ! use the HE expansion when MQ2Q2 -> 0
+       LOGMQ2Q2=LOG(MQ2Q2)
+       SIGMAAA=-3d0/4d0*LOGMQ2Q2-4d0/3d0&
+            +MQ2Q2*(-7d0/2d0+0.5d0*LOGMQ2Q2)&
+            +MQ2Q2**2*(-5d0/4d0+3.5d0*LOGMQ2Q2)&
+            +MQ2Q2**3*(3.5d0+5d0*LOGMQ2Q2)&
+            +MQ2Q2**4*(257d0/24d0+23d0/2d0*LOGMQ2Q2)
+    ELSEIF(MQ2Q2.GE.1d5)THEN
+       ! use the LE expansion when MQ2Q2 -> infinity
+       SIGMAAA=-17d0/(120d0*MQ2Q2)-5d0/336d0/MQ2Q2**2&
+            -11d0/5040d0/MQ2Q2**3-41d0/110880d0/MQ2Q2**4&
+            -7d0/102960d0/MQ2Q2**5-19d0/1441440d0/MQ2Q2**6&
+            -1d0/376992d0/MQ2Q2**7
+    ELSE
+       WRITE(*,*)"ERROR: cannot reach here ReSIGMAAA1LW"
+       STOP
+    ENDIF
+    ReSIGMAAA1LW=DREAL(SIGMAAA)
+    RETURN
+  END FUNCTION ReSIGMAAA1LW
 
   FUNCTION DeltaAlphaLep(Q)
     USE LbL_Global
@@ -343,16 +390,32 @@ CONTAINS
     RETURN
   END FUNCTION DeltaAlphaTop
 
+  FUNCTION DeltaAlphaW(Q)
+    use LbL_Global
+    ! one-loop
+    ! Delta alpha_{W}(Q)
+    IMPLICIT NONE
+    REAL(KIND(1d0))::DeltaAlphaW
+    REAL(KIND(1d0))::DeltaAlphaW1L
+    REAL(KIND(1d0)),INTENT(IN)::Q
+    REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
+    DeltaAlphaW1L=ReSIGMAAA1LW(Q,wmass_PDG)
+    DeltaAlphaW1L=DeltaAlphaW1L*(-1d0/(pipi*alphaemm1))
+    DeltaAlphaW=DeltaAlphaW1L
+    RETURN
+  END FUNCTION DeltaAlphaW
+
   SUBROUTINE Evaluate_DalphahadMZ(alphaemm1,alphaMZm1,MZ,DalphahadMZ)
     ! evaluate Delta alpha_{had}^{(5)}(mZ**2) from input
     ! alpha(0)=1/alphaemm1, alphaMZ=1/alphaMZm1
     IMPLICIT NONE
     REAL(KIND(1d0)),INTENT(IN)::alphaemm1,alphaMZm1,MZ
     REAL(KIND(1d0)),INTENT(OUT)::DalphahadMZ
-    REAL(KIND(1d0))::DeltaAlphaLepMZ,DeltaAlphaTopMZ
+    REAL(KIND(1d0))::DeltaAlphaLepMZ,DeltaAlphaTopMZ,DeltaAlphaWMZ
     DeltaAlphaLepMZ=DeltaAlphaLep(MZ)
     DeltaAlphaTopMZ=DeltaAlphaTop(MZ)
-    DalphahadMZ=1d0-DeltaAlphaLepMZ-DeltaAlphaTopMZ-alphaMZm1/alphaemm1
+    DeltaAlphaWMZ=DeltaAlphaW(MZ)
+    DalphahadMZ=1d0-DeltaAlphaLepMZ-DeltaAlphaTopMZ-DeltaAlphaWMZ-alphaMZm1/alphaemm1
     RETURN
   END SUBROUTINE Evaluate_DalphahadMZ
 
