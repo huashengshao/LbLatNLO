@@ -104,8 +104,8 @@ CONTAINS
     REAL(KIND(1d0)),INTENT(IN)::Q
     REAL(KIND(1d0)),SAVE::ALPHAEW_SAVE
     REAL(KIND(1d0)),SAVE::DalphalepMZ=0d0,DalphahadMZ=0d0,&
-         DalphatopMZ=0d0,DalphaWMZ=0d0
-    REAL(KIND(1d0))::DalphalepQ,DDalphahad,DalphatopQ,DalphaWQ
+         DalphatopMZ=0d0 ! ,DalphaWMZ=0d0
+    REAL(KIND(1d0))::DalphalepQ,DDalphahad,DalphatopQ !,DalphaWQ
     INTEGER,SAVE::init=0
     REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
     IF(init.EQ.0)THEN
@@ -121,15 +121,17 @@ CONTAINS
           ! these values are tunned to make sure
           ! when Q -> 0 we have alpha -> 1/137.036
           IF(alpha_nloop.EQ.1)THEN
-             !umass_PDG=43d-3
-             !dmass_PDG=43d-3
-             umass_PDG=53.56d-3
-             dmass_PDG=53.56d-3
+             umass_PDG=43d-3
+             dmass_PDG=43d-3
+             ! the following tunnes with W contribution
+             !umass_PDG=53.56d-3
+             !dmass_PDG=53.56d-3
           ELSEIF(alpha_nloop.EQ.2)THEN
-             !umass_PDG=83d-3
-             !dmass_PDG=83d-3
-             umass_PDG=101.7d-3
-             dmass_PDG=101.7d-3
+             umass_PDG=83d-3
+             dmass_PDG=83d-3
+             ! the following tunnes with W contribution
+             !umass_PDG=101.7d-3
+             !dmass_PDG=101.7d-3
           ELSE
              WRITE(*,*)"ERROR: unknown alpha_nloop in ALPHAEW: ", alpha_nloop
              STOP
@@ -137,7 +139,7 @@ CONTAINS
           DalphalepMZ=DeltaAlphaLep(zmass_PDG)
           DalphahadMZ=DeltaAlphaHad(zmass_PDG)
           DalphatopMZ=DeltaAlphaTop(zmass_PDG)
-          DalphaWMZ=DeltaAlphaW(zmass_PDG)
+          !DalphaWMZ=DeltaAlphaW(zmass_PDG)
        ENDIF
        init=1
     ENDIF
@@ -156,11 +158,11 @@ CONTAINS
        DalphalepQ=DeltaAlphaLep(Q)
        DDalphahad=DalphahadMZ-DeltaAlphaHad(Q)
        DalphaTopQ=DeltaAlphaTop(Q)
-       DalphaWQ=DeltaAlphaW(Q)
+       !DalphaWQ=DeltaAlphaW(Q)
        !ALPHAEW=1d0/alphaMZm1*(1d0-DalphahadMZ_PDG-DalphaTopMZ-DalphalepMZ)&
        !     /(1d0-DalphahadMZ_PDG-DalphalepQ-DalphaTopQ+DDalphahad)
        ! same as above
-       ALPHAEW=1d0/alphaemm1/(1d0-DalphahadMZ_PDG-DalphalepQ-DalphaTopQ-DalphaWQ+DDalphahad)
+       ALPHAEW=1d0/alphaemm1/(1d0-DalphahadMZ_PDG-DalphalepQ-DalphaTopQ+DDalphahad)
     ENDIF
   END FUNCTION ALPHAEW
 
@@ -253,6 +255,8 @@ CONTAINS
     RETURN
   END FUNCTION ReSIGMAAA2L
 
+  ! Note W contribution is gauge dependent
+  ! so that we should exclud it
   FUNCTION ReSIGMAAA1LW(Q,M)
     ! one-loop perturbation result of
     ! ReSigma_AA(Q)-Sigma_AA(0) for the W boson
@@ -390,6 +394,8 @@ CONTAINS
     RETURN
   END FUNCTION DeltaAlphaTop
 
+  ! Note W contribution is gauge dependent
+  ! so that we should exclud it
   FUNCTION DeltaAlphaW(Q)
     use LbL_Global
     ! one-loop
@@ -411,11 +417,11 @@ CONTAINS
     IMPLICIT NONE
     REAL(KIND(1d0)),INTENT(IN)::alphaemm1,alphaMZm1,MZ
     REAL(KIND(1d0)),INTENT(OUT)::DalphahadMZ
-    REAL(KIND(1d0))::DeltaAlphaLepMZ,DeltaAlphaTopMZ,DeltaAlphaWMZ
+    REAL(KIND(1d0))::DeltaAlphaLepMZ,DeltaAlphaTopMZ !,DeltaAlphaWMZ
     DeltaAlphaLepMZ=DeltaAlphaLep(MZ)
     DeltaAlphaTopMZ=DeltaAlphaTop(MZ)
-    DeltaAlphaWMZ=DeltaAlphaW(MZ)
-    DalphahadMZ=1d0-DeltaAlphaLepMZ-DeltaAlphaTopMZ-DeltaAlphaWMZ-alphaMZm1/alphaemm1
+    !DeltaAlphaWMZ=DeltaAlphaW(MZ)
+    DalphahadMZ=1d0-DeltaAlphaLepMZ-DeltaAlphaTopMZ-alphaMZm1/alphaemm1
     RETURN
   END SUBROUTINE Evaluate_DalphahadMZ
 
