@@ -9,7 +9,7 @@ handyGdummyobj=
 handyGdummymod=
 # uncomment the following line to use gdb to debug
 # FFLAGS=-ggdb -g -fbounds-check -ffpe-trap=invalid,zero,overflow,underflow,denormal -Wall
-objs=$(objdir)global_constants.o $(objdir)qcd_constants.o $(objdir)qcd_setup.o $(objdir)qcd_coupling.o $(objdir)assertions.o $(objdir)runge_kutta.o $(objdir)newton_method.o $(objdir)coupling_global.o $(objdir)LbL_Global.o $(objdir)evaluate_couplings.o $(objdir)LbL_setscale.o $(objdir)LbL_cuts.o $(objdir)MC_VEGAS.o $(objdir)Constants.o $(objdir)Integration_Paths.o $(objdir)use_func.o $(objdir)Func_PSI.o $(objdir)interpolation.o $(objdir)nielsen_generalized_polylog.o $(objdir)nielsen_generalized_polylog_wrapper.o $(objdir)nintlib.o $(objdir)simple_integrators.o $(objdir)UToneloopbasis.o $(objdir)oneloopints.o $(objdir)express_wz.o $(handyGdummyobj) $(objdir)GPL_wrapper.o $(objdir)twoloopbasis.o $(objdir)Euler_gamma.o $(objdir)HarmonicSums.o $(objdir)potentialfunction.o $(objdir)kinetics.o $(objdir)loopbasis.o $(objdir)LOME.o $(objdir)calc_IterInts_GPLMIs.o $(objdir)calc_IterInts_RootMIs_boundaryconstants.o $(objdir)calc_IterInts_RootMIs.o $(objdir)OneLoopLowEnergyME.o $(objdir)TwoLoopLowEnergyME.o $(objdir)OneLoopHighEnergyME.o $(objdir)TwoLoopHighEnergyME.o $(objdir)TwoLoopMasslessME.o $(objdir)TwoLoopMassiveME.o $(objdir)NLOME.o $(objdir)plot_LbL.o $(objdir)photon_PDFs.o $(objdir)phase_space_integrators.o $(objdir)driver.o
+objs=$(objdir)global_constants.o $(objdir)qcd_constants.o $(objdir)qcd_setup.o $(objdir)qcd_coupling.o $(objdir)assertions.o $(objdir)runge_kutta.o $(objdir)newton_method.o $(objdir)coupling_global.o $(objdir)LbL_Global.o $(objdir)evaluate_couplings.o $(objdir)LbL_setscale.o $(objdir)LbL_cuts.o $(objdir)MC_VEGAS.o $(objdir)Constants.o $(objdir)Integration_Paths.o $(objdir)use_func.o $(objdir)Func_PSI.o $(objdir)interpolation.o $(objdir)nielsen_generalized_polylog.o $(objdir)nielsen_generalized_polylog_wrapper.o $(objdir)nintlib.o $(objdir)simple_integrators.o $(objdir)UToneloopbasis.o $(objdir)oneloopints.o $(objdir)express_wz.o $(handyGdummyobj) $(objdir)GPL_wrapper.o $(objdir)twoloopbasis.o $(objdir)Euler_gamma.o $(objdir)HarmonicSums.o $(objdir)potentialfunction.o $(objdir)TwoLoopCoulombME.o $(objdir)kinetics.o $(objdir)loopbasis.o $(objdir)LOME.o $(objdir)calc_IterInts_GPLMIs.o $(objdir)calc_IterInts_RootMIs_boundaryconstants.o $(objdir)calc_IterInts_RootMIs.o $(objdir)OneLoopLowEnergyME.o $(objdir)TwoLoopLowEnergyME.o $(objdir)OneLoopHighEnergyME.o $(objdir)TwoLoopHighEnergyME.o $(objdir)TwoLoopMasslessME.o $(objdir)TwoLoopMassiveME.o $(objdir)NLOME.o $(objdir)plot_LbL.o $(objdir)photon_PDFs.o $(objdir)phase_space_integrators.o $(objdir)driver.o
 mod = $(moddir)/*.mod
 exe = $(PWD)/bin/LbLatNLO
 linkexe = $(PWD)/LbLatNLO
@@ -75,6 +75,9 @@ $(objdir)OneLoopLowEnergyME.o: $(srcdir)OneLoopLowEnergyME.f
 	$(FC) $(FFLAGS) -c $<
 
 $(objdir)TwoLoopHighEnergyME.o: $(srcdir)TwoLoopHighEnergyME.f $(moddir)nielsen_generalized_polylog_wrapper.mod
+	$(FC) $(FFLAGS) -c $<
+
+$(objdir)TwoLoopCoulombME.o: $(srcdir)TwoLoopCoulombME.f
 	$(FC) $(FFLAGS) -c $<
 
 $(objdir)OneLoopHighEnergyME.o: $(srcdir)OneLoopHighEnergyME.f

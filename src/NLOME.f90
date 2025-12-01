@@ -1825,7 +1825,7 @@ CONTAINS
        stop
     end select
     if(log10xs.LE.log10xsmax)then
-       ! use the low-energy limit                                                                               
+       ! use the low-energy limit
        massive_2LAmp_xs_LElimit=0
     else
        ! just use the massive two-loop amps
@@ -1834,6 +1834,7 @@ CONTAINS
     return
   end function massive_2LAmp_xs_LElimit
 
+  
   subroutine progress_LbL(j,nmax,forceinit)
     implicit none
     integer,intent(in)::j,nmax
