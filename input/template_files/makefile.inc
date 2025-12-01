@@ -9,7 +9,7 @@ handyGdummyobj=
 handyGdummymod=
 # uncomment the following line to use gdb to debug
 # FFLAGS=-ggdb -g -fbounds-check -ffpe-trap=invalid,zero,overflow,underflow,denormal -Wall
-objs=$(objdir)global_constants.o $(objdir)qcd_constants.o $(objdir)qcd_setup.o $(objdir)qcd_coupling.o $(objdir)assertions.o $(objdir)runge_kutta.o $(objdir)newton_method.o $(objdir)coupling_global.o $(objdir)LbL_Global.o $(objdir)evaluate_couplings.o $(objdir)LbL_setscale.o $(objdir)LbL_cuts.o $(objdir)MC_VEGAS.o $(objdir)Constants.o $(objdir)Integration_Paths.o $(objdir)use_func.o $(objdir)Func_PSI.o $(objdir)interpolation.o $(objdir)nielsen_generalized_polylog.o $(objdir)nielsen_generalized_polylog_wrapper.o $(objdir)nintlib.o $(objdir)simple_integrators.o $(objdir)UToneloopbasis.o $(objdir)oneloopints.o $(objdir)express_wz.o $(handyGdummyobj) $(objdir)GPL_wrapper.o $(objdir)twoloopbasis.o $(objdir)kinetics.o $(objdir)loopbasis.o $(objdir)LOME.o $(objdir)calc_IterInts_GPLMIs.o $(objdir)calc_IterInts_RootMIs_boundaryconstants.o $(objdir)calc_IterInts_RootMIs.o $(objdir)OneLoopLowEnergyME.o $(objdir)TwoLoopLowEnergyME.o $(objdir)OneLoopHighEnergyME.o $(objdir)TwoLoopHighEnergyME.o $(objdir)TwoLoopMasslessME.o $(objdir)TwoLoopMassiveME.o $(objdir)NLOME.o $(objdir)plot_LbL.o $(objdir)photon_PDFs.o $(objdir)phase_space_integrators.o $(objdir)driver.o
+objs=$(objdir)global_constants.o $(objdir)qcd_constants.o $(objdir)qcd_setup.o $(objdir)qcd_coupling.o $(objdir)assertions.o $(objdir)runge_kutta.o $(objdir)newton_method.o $(objdir)coupling_global.o $(objdir)LbL_Global.o $(objdir)evaluate_couplings.o $(objdir)LbL_setscale.o $(objdir)LbL_cuts.o $(objdir)MC_VEGAS.o $(objdir)Constants.o $(objdir)Integration_Paths.o $(objdir)use_func.o $(objdir)Func_PSI.o $(objdir)interpolation.o $(objdir)nielsen_generalized_polylog.o $(objdir)nielsen_generalized_polylog_wrapper.o $(objdir)nintlib.o $(objdir)simple_integrators.o $(objdir)UToneloopbasis.o $(objdir)oneloopints.o $(objdir)express_wz.o $(handyGdummyobj) $(objdir)GPL_wrapper.o $(objdir)twoloopbasis.o $(objdir)Euler_gamma.o $(objdir)HarmonicSums.o $(objdir)potentialfunction.o $(objdir)kinetics.o $(objdir)loopbasis.o $(objdir)LOME.o $(objdir)calc_IterInts_GPLMIs.o $(objdir)calc_IterInts_RootMIs_boundaryconstants.o $(objdir)calc_IterInts_RootMIs.o $(objdir)OneLoopLowEnergyME.o $(objdir)TwoLoopLowEnergyME.o $(objdir)OneLoopHighEnergyME.o $(objdir)TwoLoopHighEnergyME.o $(objdir)TwoLoopMasslessME.o $(objdir)TwoLoopMassiveME.o $(objdir)NLOME.o $(objdir)plot_LbL.o $(objdir)photon_PDFs.o $(objdir)phase_space_integrators.o $(objdir)driver.o
 mod = $(moddir)/*.mod
 exe = $(PWD)/bin/LbLatNLO
 linkexe = $(PWD)/LbLatNLO
@@ -20,11 +20,11 @@ FFLAGS+=$(INCLUDE) -I$(gammaupcdir) -fPIC -w -fno-automatic -ffixed-line-length-
 all:    clean $(exe)
 	ln -s $(exe) $(linkexe)
 
-$(exe): makefile_hbook makefile_gammaUPC makefile_fastgpl $(objs)
+$(exe): makefile_hbook makefile_gammaUPC makefile_polygamma makefile_fastgpl $(objs)
 	@cp *.o $(objdir)
 	@cp *.mod $(moddir)
 	@rm *.o *.mod
-	$(FC) -o $(exe) $(objs) -L$(libdir) -lhbook -lgammaUPC $(EXLIBS) -lfastgplfortran
+	$(FC) -o $(exe) $(objs) -L$(libdir) -lhbook -lgammaUPC -lpolygamma $(EXLIBS) -lfastgplfortran
 
 $(objdir)phase_space_integrators.o $(moddir)phase_space_integrators.mod: $(srcdir)phase_space_integrators.f90 $(moddir)LbL_Global.mod $(moddir)plot_LbL.mod $(moddir)Constants.mod $(moddir)LbL_setscale.mod $(moddir)qcd_constants.mod $(moddir)qcd_setup.mod $(moddir)qcd_coupling.mod $(moddir)coupling_global.mod $(moddir)nintlib.mod $(moddir)LbL_cuts.mod $(moddir)NLOME.mod $(moddir)MC_VEGAS.mod $(moddir)photon_PDFs.mod $(moddir)GPL_wrapper.mod $(gammaupcdir)elasticphotonphotonflux.mod
 	$(FC) $(FFLAGS) -c $<
@@ -88,6 +88,15 @@ $(objdir)oneloopints.o $(moddir)oneloopints.mod: $(srcdir)oneloopints.f $(moddir
 
 $(objdir)UToneloopbasis.o $(moddir)UToneloopbasis.mod: $(srcdir)UToneloopbasis.f $(moddir)GPL_wrapper.mod $(moddir)express_wz.mod $(moddir)kinetics.mod
 	$(FC) $(FFLAGS) -c $< 
+
+$(objdir)Euler_gamma.o $(moddir)Euler_gamma.mod: $(srcdir)Euler_gamma.f90
+	$(FC) $(FFLAGS) -c $<
+
+$(objdir)HarmonicSums.o $(moddir)HarmonicSums.mod: $(srcdir)HarmonicSums.f90 $(moddir)Euler_gamma.mod
+	$(FC) $(FFLAGS) -c $<
+
+$(objdir)potentialfunction.o $(moddir)potentialfunction.mod: $(srcdir)potentialfunction.f90 $(moddir)HarmonicSums.mod
+	$(FC) $(FFLAGS) -c $<
 
 $(objdir)kinetics.o $(moddir)kinetics.mod: $(srcdir)kinetics.f90
 	$(FC) $(FFLAGS) -c $<
@@ -168,12 +177,15 @@ makefile_hbook :
 	(cd ./analysis/hbook; make clean -f makefile_hbook ; make -f makefile_hbook; rm *.o; cd ../../)
 makefile_gammaUPC :
 	(cd ./vendor/gammaUPC; make clean -f makefile_gammaUPC ; make -f makefile_gammaUPC; rm *.o; cd ../../)
+makefile_polygamma :
+	(cd ./vendor/polygamma; make clean -f makefile_polygamma; make -f makefile_polygamma; rm *.o; cd ../../)
 makefile_fastgpl :
 	(cd ./gpl/fastgpl/ ; make clean -f makefile_fastgplfortran ; make -f makefile_fastgplfortran ; cd ../../)
 
 clean:
 	@(cd ./analysis/hbook; make clean -f makefile_hbook; cd ../../)
 	@(cd ./vendor/gammaUPC; make clean -f makefile_gammaUPC; cd ../../)
+	@(cd ./vendor/polygamma; make clean -f makefile_polygamma; cd ../../)
 	@(cd ./gpl/fastgpl; make clean -f makefile_fastgplfortran; cd ../../)
 	rm -rf $(objs) $(mod) $(exe) $(linkexe) $(PWD)/tmp/* *~ $(PWD)/input/*~ $(PWD)/src/*~ $(PWD)/output/* fort.* ./bin/*
 end
