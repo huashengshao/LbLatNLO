@@ -2,10 +2,10 @@
       !                     -I*Nc*Qf^4*a^2*as/Pi*CF for QCD
 
       ! LP Coulomb approximation
-      function TwoLoop_HelAmp_LPCoulombApprox(amp1L,
-     $     mu2oM2,xs)
+      subroutine Get_TwoLoop_HelAmp_LPCoulombApprox(mu2oM2,xs,
+     $     amp1L,amp2L)
       implicit none
-      double complex TwoLoop_HelAmp_LPCoulombApprox(5)
+      double complex amp2L(5)
       ! amp1L(5) is the one-loop massive helicity amplitudes
       ! by calling OneLoop_HelAmp_Massive
       ! The prefactor 8*I*Nc*Qf^4*a^2 has been dropped
@@ -26,7 +26,7 @@
       ! EEoM=Sqrt(xs)-2
       EEoM=DSQRT(xs)-2d0
       IF(EEoM.EQ.0d0)THEN
-         TwoLoop_HelAmp_LPCoulombApprox(1:5)=dcmplx(0d0,0d0)
+         amp2L(1:5)=dcmplx(0d0,0d0)
          return
       ENDIF
       ! EEoM -> EEoM+i0^+
@@ -42,7 +42,7 @@
       ! GLP(aS)/GLP(aS**0)/(-aS*CF/(8*Pi))
       pref=4d0*pipi*(1d0-logv)/sqrtv
       do ihel=1,5
-         TwoLoop_HelAmp_LPCoulombApprox(ihel)=pref*amp1L(ihel)
+         amp2L(ihel)=pref*amp1L(ihel)
       enddo
       return
       end
