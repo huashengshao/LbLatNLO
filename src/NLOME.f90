@@ -1535,6 +1535,15 @@ CONTAINS
           amps(4)=amps(5)
           amps(5)=amptmp
        endif
+       ! for ++++ and --++ amplitudes
+       ! we shall use the Coulomb approximation
+       ! to improve the threshold region
+       ! where they suffer from logarithmic enhancements
+       IF(xs.GT.3.98d0.and.xs.LT.4.08d0)THEN
+          CALL Get_TwoLoop_HelAmp_LPCoulombApprox(xs,xt,ampstmp1)
+          amps(1)=ampstmp1(1) ! ++++
+          amps(3)=ampstmp1(3) ! --++
+       ENDIF
        return
     endif
     return
