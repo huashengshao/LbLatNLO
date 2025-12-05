@@ -1,5 +1,10 @@
 MODULE NLOME
   IMPLICIT NONE
+  real(kind(1d0)),dimension(10),save,private::mass
+  logical,dimension(10),save,private::is_massive_quark
+  logical,dimension(10),save,private::is_massive_lepton
+  integer,save,private::i_mass,i_massless
+  real(kind(1d0)),save,private::MQ
 CONTAINS
   subroutine stwoloopmatrix_LbL(pborn,virt_wgts)
     use kinetics
@@ -70,13 +75,13 @@ CONTAINS
     !integer LElimit
     double precision log10xs,y
     double complex prefactor,prefac01L,prefac02LQCD,prefac02LQED
-    integer i_mass,i_massless
+    !integer i_mass,i_massless
     double complex prefac1L(10),prefac2LQCD(10),prefac2LQED(10)
-    double precision mass(10)
+    !double precision mass(10)
     integer init,init_grid
     data init/0/
     data init_grid/0/
-    save init,init_grid,i_mass,i_massless,prefac01L,prefac1L,mass
+    save init,init_grid,prefac01L,prefac1L !,i_mass,i_massless,mass
     save prefac02LQCD,prefac02LQED,prefac2LQCD,prefac2LQED
     double precision pipi
     parameter (pipi=3.14159265358979323846264338328d0)
@@ -100,6 +105,9 @@ CONTAINS
        ! initialisation
        prefactor=dcmplx(0d0,8d0*alphaemm1**(-2))
        AQEDUP=alphaemm1**(-1)
+       mass(1:10)=0d0
+       is_massive_quark(1:10)=.FALSE.
+       is_massive_lepton(1:10)=.FALSE.
        i_mass=0
        i_massless=0
        prefac01L=dcmplx(0d0,0d0)
@@ -123,6 +131,7 @@ CONTAINS
        ELSEIF(umass.GT.0d0)THEN
           i_mass=i_mass+1
           mass(i_mass)=umass
+          is_massive_quark(i_mass)=.TRUE.
           prefac1L(i_mass)=3d0*(2d0/3d0)**4*prefactor
           ! do not include aS
           prefac2LQCD(i_mass)=-1d0/8d0*prefactor*3d0*(2d0/3d0)**4&
@@ -148,6 +157,7 @@ CONTAINS
        ELSEIF(dmass.GT.0d0)THEN
           i_mass=i_mass+1
           mass(i_mass)=dmass
+          is_massive_quark(i_mass)=.TRUE.
           prefac1L(i_mass)=3d0*(-1d0/3d0)**4*prefactor
           prefac2LQCD(i_mass)=-1d0/8d0*prefactor*3d0*(-1d0/3d0)**4&
                *CF/pipi
@@ -172,6 +182,7 @@ CONTAINS
        ELSEIF(smass.GT.0d0)THEN
           i_mass=i_mass+1
           mass(i_mass)=smass
+          is_massive_quark(i_mass)=.TRUE.
           prefac1L(i_mass)=3d0*(-1d0/3d0)**4*prefactor
           prefac2LQCD(i_mass)=-1d0/8d0*prefactor*3d0*(-1d0/3d0)**4&
                *CF/pipi
@@ -196,6 +207,7 @@ CONTAINS
        ELSEIF(cmass.GT.0d0)THEN
           i_mass=i_mass+1
           mass(i_mass)=cmass
+          is_massive_quark(i_mass)=.TRUE.
           prefac1L(i_mass)=3d0*(2d0/3d0)**4*prefactor
           prefac2LQCD(i_mass)=-1d0/8d0*prefactor*3d0*(2d0/3d0)**4&
                *CF/pipi
@@ -220,6 +232,7 @@ CONTAINS
        ELSEIF(bmass.GT.0d0)THEN
           i_mass=i_mass+1
           mass(i_mass)=bmass
+          is_massive_quark(i_mass)=.TRUE.
           prefac1L(i_mass)=3d0*(-1d0/3d0)**4*prefactor
           prefac2LQCD(i_mass)=-1d0/8d0*prefactor*3d0*(-1d0/3d0)**4&
                *CF/pipi
@@ -244,6 +257,7 @@ CONTAINS
        ELSEIF(tmass.GT.0d0)THEN
           i_mass=i_mass+1
           mass(i_mass)=tmass
+          is_massive_quark(i_mass)=.TRUE.
           prefac1L(i_mass)=3d0*(2d0/3d0)**4*prefactor
           prefac2LQCD(i_mass)=-1d0/8d0*prefactor*3d0*(2d0/3d0)**4&
                *CF/pipi
@@ -269,6 +283,7 @@ CONTAINS
        ELSEIF(emass.GT.0d0)THEN
           i_mass=i_mass+1
           mass(i_mass)=emass
+          is_massive_lepton(i_mass)=.TRUE.
           prefac1L(i_mass)=(-1d0)**4*prefactor
           prefac2LQCD(i_mass)=0d0
           if(alpha_scheme.LE.1)then
@@ -292,6 +307,7 @@ CONTAINS
        ELSEIF(mumass.GT.0d0)THEN
           i_mass=i_mass+1
           mass(i_mass)=mumass
+          is_massive_lepton(i_mass)=.TRUE.
           prefac1L(i_mass)=(-1d0)**4*prefactor
           prefac2LQCD(i_mass)=0d0
           if(alpha_scheme.LE.1)then
@@ -315,6 +331,7 @@ CONTAINS
        ELSEIF(taumass.GT.0d0)THEN
           i_mass=i_mass+1
           mass(i_mass)=taumass
+          is_massive_lepton(i_mass)=.TRUE.
           prefac1L(i_mass)=(-1d0)**4*prefactor
           prefac2LQCD(i_mass)=0d0
           if(alpha_scheme.LE.1)then
@@ -1843,6 +1860,101 @@ CONTAINS
     return
   end function massive_2LAmp_xs_LElimit
 
+  SUBROUTINE Get_CoulRes_QCDScale(imass,xs,xiR,muR,scale)
+    USE newton_method
+    IMPLICIT NONE
+    INTEGER,INTENT(IN)::imass
+    REAL(KIND(1d0)),INTENT(IN)::xs,xiR,muR
+    REAL(KIND(1d0)),INTENT(OUT)::scale
+    INTEGER,SAVE::init=0
+    REAL(KIND(1d0)),DIMENSION(10),SAVE::muB
+    REAL(KIND(1d0))::muC,FPMUC,mf,EE,EEomf,muBF
+    INTEGER::i
+    REAL(KIND(1d0)),PARAMETER::EEomfLow=-0.202041028867287607210863701176d0
+    REAL(KIND(1d0)),PARAMETER::EEomfUp=0.343145750507619804793245103161d0
+    IF(init.EQ.0)THEN
+       ! obtain mu_B for QCD corrections to heavy quarks
+       muB(1:10)=0d0
+       DO i=1,i_mass
+          IF(.NOT.is_massive_quark(i))CYCLE
+          IF(mass(i).LT.1d0)THEN
+             muB(i)=1d0
+             CYCLE
+          ENDIF
+          muC=MAX(mass(i)/3d0,1d0)
+          MQ=mass(i) ! MQ will be used in SCALE_IN_MUB_EQ_QCD
+          CALL newtonsolver(muC,FPMUC,SCALE_IN_MUB_EQ_QCD,1D-14,-1)
+          IF(FPMUC.EQ.-1D99.OR.ISNAN(FPMUC).OR.1D0/FPMUC.EQ.0d0)THEN
+             PRINT *, "WARNING: Linear Newton procedure does not work !"
+             muB(i)=1d0
+          ENDIF
+          IF(muC.LT.0.5d0.OR.ISNAN(muC))THEN
+             muB(i)=1d0
+          ELSE
+             muB(i)=muC
+          ENDIF
+       ENDDO
+       init=1
+    ENDIF
+    IF(mass(imass).EQ.0d0)THEN
+       WRITE(*,*)"ERROR:: mass is zero in Get_CoulRes_QCDScale"
+       STOP
+    ENDIF
+    IF(.NOT.is_massive_quark(imass))THEN
+       WRITE(*,*)"ERROR: it is not a massive quark in Get_CoulRes_QCDScale"
+       STOP
+    ENDIF
+    mf=mass(imass)
+    EE=(dsqrt(xs)-2d0)*mf
+    EEomf=EE/mf
+    IF(EEomf.LE.EEomfLow.OR.EEomf.GE.EEomfUp)THEN
+       ! relativistic regimes
+       scale=MAX(muR,1d0)
+       return
+    ENDIF
+    ! non-relativistic region
+    muBF=muB(imass)
+    scale=MAX(muBF,DSQRT(4d0*mf*DABS(EE)))
+    scale=MAX(scale*xiR,1d0)
+    return
+  END SUBROUTINE Get_CoulRes_QCDScale
+
+  SUBROUTINE SCALE_IN_MUB_EQ_QCD(muB,f,fp)
+    ! f(x)=CF*mQ*as(muB)-muB
+    USE LbL_Global
+    USE qcd_constants
+    USE evaluate_couplings
+    IMPLICIT NONE
+    REAL(KIND(1d0)),INTENT(IN)::muB
+    REAL(KIND(1d0)),INTENT(OUT)::f,fp
+    REAL(KIND(1d0)),PARAMETER::twopi=6.28318530717958647692528676656d0
+    REAL(KIND(1d0))::asmuB,asmuBo2pi,betaasmuB
+    IF(muB.LT.0.5d0.OR.ISNAN(muB))THEN
+       PRINT *, "WARNING: THE CONVERGENCE OF LINEAR NEWTWON METHOD IS TOO BAD !"
+       PRINT *, "muB=",muB
+       f=0d0
+       fp=-1d99
+       RETURN
+    ENDIF
+    asmuB=ALPHAS(muB)
+    asmuBo2pi=asmuB/twopi
+    f=CF*MQ*asmuB-muB
+    betaasmuB=beta0*asmuBo2pi
+    IF(alphas_nloop.GE.2)THEN
+       betaasmuB=betaasmuB+beta1*asmuBo2pi**2
+    ENDIF
+    IF(alphas_nloop.GE.3)THEN
+       betaasmuB=betaasmuB+beta2*asmuBo2pi**3
+    ENDIF
+    IF(alphas_nloop.GE.4)THEN
+       betaasmuB=betaasmuB+beta3*asmuBo2pi**4
+    ENDIF
+    IF(alphas_nloop.GE.5)THEN
+       betaasmuB=betaasmuB+beta4*asmuBo2pi**5
+    ENDIF
+    fp=CF*MQ*2d0/muB*(-asmuB)*betaasmuB-1d0
+    RETURN
+  END SUBROUTINE SCALE_IN_MUB_EQ_QCD
   
   subroutine progress_LbL(j,nmax,forceinit)
     implicit none

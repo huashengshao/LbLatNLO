@@ -25,7 +25,7 @@ order -3
 
 # Coulomb resummation
 # 0: no Coulomb resummation
-# 1: Leading power Coulomb resummation when order =/= 0
+# 1: Leading power Coulomb resummation when order =/= 0 for massive fermion loops
 coulomb 1
 
 # masses (negative means we will not include such a contribution)

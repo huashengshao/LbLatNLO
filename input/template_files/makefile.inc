@@ -38,7 +38,7 @@ $(objdir)photon_PDFs.o $(moddir)photon_PDFs.mod: $(srcdir)photon_PDFs.f90 $(modd
 $(objdir)LOME.o: $(srcdir)LOME.f $(moddir)kinetics.mod $(moddir)UToneloopbasis.mod
 	$(FC) $(FFLAGS) -c $<
 
-$(objdir)NLOME.o $(moddir)NLOME.mod: $(srcdir)NLOME.f90 $(moddir)kinetics.mod $(moddir)UToneloopbasis.mod $(moddir)qcd_constants.mod $(moddir)evaluate_couplings.mod $(moddir)LbL_setscale.mod $(moddir)interpolation.mod
+$(objdir)NLOME.o $(moddir)NLOME.mod: $(srcdir)NLOME.f90 $(moddir)kinetics.mod $(moddir)UToneloopbasis.mod $(moddir)qcd_constants.mod $(moddir)evaluate_couplings.mod $(moddir)LbL_setscale.mod $(moddir)interpolation.mod $(moddir)newton_method.mod
 	$(FC) $(FFLAGS) -c $<
 
 $(objdir)calc_IterInts_GPLMIs.o $(moddir)calc_IterInts_GPLMIs.mod: $(srcdir)calc_IterInts_GPLMIs.f $(moddir)GPL_wrapper.mod
