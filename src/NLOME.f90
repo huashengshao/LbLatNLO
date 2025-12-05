@@ -1968,14 +1968,14 @@ CONTAINS
     RETURN
   END SUBROUTINE SCALE_IN_MUB_EQ_QCD
 
-  SUBROUTINE Get_CoulRes_QEDScale(imass,xs,xiR,muR,scale)
+  SUBROUTINE Get_CoulRes_QEDScale(imass,xs,xiR,muR,scale0)
     USE LbL_Global
     USE newton_method
     USE evaluate_couplings
     IMPLICIT NONE
     INTEGER,INTENT(IN)::imass
     REAL(KIND(1d0)),INTENT(IN)::xs,xiR,muR
-    REAL(KIND(1d0)),INTENT(OUT)::scale
+    REAL(KIND(1d0)),INTENT(OUT)::scale0
     INTEGER,SAVE::init=0
     REAL(KIND(1d0)),DIMENSION(10),SAVE::muB
     REAL(KIND(1d0))::muC,FPMUC,mf,EE,EEomf,muBF
@@ -2024,13 +2024,13 @@ CONTAINS
     EEomf=EE/mf
     IF(EEomf.LE.EEomfLow.OR.EEomf.GE.EEomfUp)THEN
        ! relativistic regimes
-       scale=muR
+       scale0=muR
        return
     ENDIF
     ! non-relativistic region
     muBF=muB(imass)
-    scale=MAX(muBF,DSQRT(4d0*mf*DABS(EE)))
-    scale=scale*xiR
+    scale0=MAX(muBF,DSQRT(4d0*mf*DABS(EE)))
+    scale0=scale0*xiR
     return
   END SUBROUTINE Get_CoulRes_QEDScale
 
