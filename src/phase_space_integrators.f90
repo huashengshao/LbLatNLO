@@ -95,6 +95,14 @@ CONTAINS
        STOP
     ENDIF
 
+    IF(order.NE.0)then
+       CALL ReadElem_integer('coulomb',coulomb)
+       IF(coulomb.LT.0.OR.coulomb.GT.1)THEN
+          WRITE(*,*)"ERROR: coulomb must be between 0 to 1. coulomb=",coulomb
+          STOP
+       ENDIF
+    ENDIF
+
     lunwei=.FALSE.
     lhewgt=.FALSE.
     CALL ReadElem_logic('topdrawer_output',topdrawer_output)

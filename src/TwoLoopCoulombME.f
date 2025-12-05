@@ -229,3 +229,118 @@
       amps(3)=dcmplx(ampAhel3,0d0)
       return
       end
+
+      ! We have taken out the global factor -I*Nc*Qf^4*a^2 
+      ! LP Coulomb approximation without A term for one-loop
+      subroutine Get_OneLoop_HelAmp_LPCoulombApproxNOA(xs,amp1L)
+      implicit none
+      double complex amp1L(5)
+      ! xs=s/mf**2
+      double precision xs
+      double precision EEoM
+      double complex sqrtv,prefv1
+      double precision pipi
+      parameter(pipi=3.14159265358979323846264338328d0)
+      if(xs.LE.0d0)THEN
+         WRITE(*,*)"ERROR: xs < 0"
+         STOP
+      ENDIF
+      ! EEoM=EE/mf, EE=Sqrt(s)-2*mf
+      ! EEoM=Sqrt(xs)-2
+      EEoM=DSQRT(xs)-2d0
+      IF(EEoM.EQ.0d0)THEN
+         amp1L(1:5)=dcmplx(0d0,0d0)
+         return
+      ENDIF
+      ! EEoM -> EEoM+i0^+
+      IF(EEoM.GT.0d0)THEN
+         ! sqrt(-EEoM)=-I*sqrt(EEoM)
+         sqrtv=dcmplx(0d0,-dsqrt(EEoM))
+      ELSE
+         sqrtv=dcmplx(dsqrt(-EEoM),0d0)
+      ENDIF
+      ! O(v**1)
+      prefv1=-8d0*pipi*sqrtv
+      amp1L(1)=prefv1
+      amp1L(3)=-prefv1
+      amp1L(2)=dcmplx(0d0,0d0)
+      amp1L(4)=dcmplx(0d0,0d0)
+      amp1L(5)=dcmplx(0d0,0d0)
+      return
+      end
+
+      ! We have taken out the global factor -I*Nc*Qf^4*a^2
+      ! LP Coulomb resummation
+      ! LP QCD:
+      !   aS(muR)=aSmuR, aS(muC)=aSmuC, DC=-CF=-4/3 (for quarks) or 0 (for leptons)
+      ! LP QED:
+      !   a(muR)=aSmuR, a(muC)=aSmuC, DC=-Qf**2      
+      subroutine Get_LPCoulRes_HelAmp(aSmuR,aSmuC,muC,DC,E,mf,ampLP)
+      use potentialfunction
+      implicit none
+      double complex ampLP(5)
+      double precision aSmuR, aSmuC, muC, DC, E, mf
+      double precision xxs
+      double complex G00LP
+      double precision pipi
+      parameter(pipi=3.14159265358979323846264338328d0)
+      IF(DC.eq.0d0)then
+         ! no coupling, resummed one is same as LO LP Coulomb Approximate without A term
+         xxs=(E/mf+2d0)**2
+         CALL Get_OneLoop_HelAmp_LPCoulombApproxNOA(xxs,ampLP)
+         return
+      endif
+      CALL Get_G00LP(aSmuC,muC,DC,E,mf,0d0,G00LP)
+      ampLP(1)=32d0*pipi**2/mf**2*(1d0+
+     $     aSmuR/pipi*DC*(5d0-pipi**2/4d0))*G00LP
+      ampLP(3)=-ampLP(1)
+      ampLP(2)=dcmplx(0d0,0d0)
+      ampLP(4)=dcmplx(0d0,0d0)
+      ampLP(5)=dcmplx(0d0,0d0)
+      return
+      end
+
+      ! We need to multiply -I*Nc*Qf^4*a^2*a/Pi*Qf^2 for QED
+      !                     -I*Nc*Qf^4*a^2*as/Pi*CF for QCD
+
+      ! LP Coulomb resummation improved two-loop amplitudes
+      ! LP QCD:
+      !   aS(muR)=aSmuR, aS(muC)=aSmuC, DC=-CF=-4/3 (for quarks) or 0 (for leptons)
+      ! LP QED:
+      !   a(muR)=aSmuR, a(muC)=aSmuC, DC=-Qf**2
+      subroutine Get_TwoLoop_HelAmp_LPCoulImproved(aSmuR,aSmuC,muC,
+     $     DC,xs,mf,amp2L,amp2LLP)
+      implicit none
+      double complex amp2L(5),amp2LLP(5)
+      double complex ampLP(5),amp1LCoul(5), amp2LCoul(5)
+      double precision aSmuR, aSmuC, muC, DC, xs, mf
+      double precision mu2oM2
+      double precision E,pref
+      double precision pipi
+      parameter(pipi=3.14159265358979323846264338328d0)
+      IF(xs.LT.0d0)THEN
+         WRITE(*,*)"ERROR: xs < 0"
+         STOP
+      ENDIF
+      IF(aSmuR.EQ.0d0)THEN
+         WRITE(*,*)"ERROR: aSmuR = 0"
+         STOP
+      ENDIF
+      amp2LLP(1:5)=amp2L(1:5)
+      IF(DC.eq.0d0)RETURN
+      ! binding energy
+      E=(dsqrt(xs)-2d0)*mf
+      pref=aSmuR/pipi*(-DC)
+      CALL Get_LPCoulRes_HelAmp(aSmuR,aSmuC,muC,DC,E,mf,ampLP)
+      ampLP(1)=ampLP(1)/pref
+      ampLP(3)=ampLP(3)/pref
+      CALL Get_OneLoop_HelAmp_LPCoulombApproxNOA(xs,amp1LCoul)
+      amp1LCoul(1)=amp1LCoul(1)/pref
+      amp1LCoul(3)=amp1LCoul(3)/pref
+      mu2oM2=muC**2/mf**2
+      CALL Get_TwoLoop_HelAmp_LPCoulombApproxNOA(mu2oM2,xs,
+     $     amp2LCoul)
+      amp2LLP(1)=amp2L(1)+ampLP(1)-amp1LCoul(1)-amp2LCoul(1)
+      amp2LLP(3)=amp2L(3)+ampLP(3)-amp1LCoul(3)-amp2LCoul(3)
+      return
+      end

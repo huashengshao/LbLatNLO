@@ -14,6 +14,11 @@ MODULE LbL_Global
   REAL(KIND(1d0)),DIMENSION(2)::LbL_RA,LbL_aA,LbL_wA
   ! order
   INTEGER::order=-3
+  ! coulomb
+  ! 0: no Coulomb resummation
+  ! 1: Leading-power Coulomb resummation when order =/= 0
+  INTEGER::coulomb=0
+  
   ! masses (negative means we will not include such a contribution)
   REAL(KIND(1d0))::emass=0d0
   REAL(KIND(1d0))::mumass=0d0

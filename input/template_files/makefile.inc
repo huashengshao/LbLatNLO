@@ -77,7 +77,7 @@ $(objdir)OneLoopLowEnergyME.o: $(srcdir)OneLoopLowEnergyME.f
 $(objdir)TwoLoopHighEnergyME.o: $(srcdir)TwoLoopHighEnergyME.f $(moddir)nielsen_generalized_polylog_wrapper.mod
 	$(FC) $(FFLAGS) -c $<
 
-$(objdir)TwoLoopCoulombME.o: $(srcdir)TwoLoopCoulombME.f
+$(objdir)TwoLoopCoulombME.o: $(srcdir)TwoLoopCoulombME.f $(moddir)potentialfunction.mod
 	$(FC) $(FFLAGS) -c $<
 
 $(objdir)OneLoopHighEnergyME.o: $(srcdir)OneLoopHighEnergyME.f
