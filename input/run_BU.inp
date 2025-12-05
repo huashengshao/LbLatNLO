@@ -23,6 +23,11 @@ UPC_photon_flux 1     # only colpar=1. 1: ChFF (2207.03012); 2: EDFF (2207.03012
 # -3: NLO QED+QCD |A(0,0)+A(0,1)+A(1,0)|**2
 order -3
 
+# Coulomb resummation
+# 0: no Coulomb resummation
+# 1: Leading power Coulomb resummation when order =/= 0 for massive fermion loops
+coulomb 1
+
 # masses (negative means we will not include such a contribution)
 emass  -1d0           # electron mass (pole mass)
 mumass  -1d0          # muon mass (pole mass)

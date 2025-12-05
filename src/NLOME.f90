@@ -3,8 +3,9 @@ MODULE NLOME
   real(kind(1d0)),dimension(10),save,private::mass
   logical,dimension(10),save,private::is_massive_quark
   logical,dimension(10),save,private::is_massive_lepton
+  real(kind(1d0)),dimension(10),save,private::massive_charge
   integer,save,private::i_mass,i_massless
-  real(kind(1d0)),save,private::MQ
+  real(kind(1d0)),save,private::MQ,Qf2
 CONTAINS
   subroutine stwoloopmatrix_LbL(pborn,virt_wgts)
     use kinetics
@@ -106,6 +107,7 @@ CONTAINS
        prefactor=dcmplx(0d0,8d0*alphaemm1**(-2))
        AQEDUP=alphaemm1**(-1)
        mass(1:10)=0d0
+       massive_charge(1:10)=0d0
        is_massive_quark(1:10)=.FALSE.
        is_massive_lepton(1:10)=.FALSE.
        i_mass=0
@@ -132,6 +134,7 @@ CONTAINS
           i_mass=i_mass+1
           mass(i_mass)=umass
           is_massive_quark(i_mass)=.TRUE.
+          massive_charge(i_mass)=2d0/3d0
           prefac1L(i_mass)=3d0*(2d0/3d0)**4*prefactor
           ! do not include aS
           prefac2LQCD(i_mass)=-1d0/8d0*prefactor*3d0*(2d0/3d0)**4&
@@ -158,6 +161,7 @@ CONTAINS
           i_mass=i_mass+1
           mass(i_mass)=dmass
           is_massive_quark(i_mass)=.TRUE.
+          massive_charge(i_mass)=-1d0/3d0
           prefac1L(i_mass)=3d0*(-1d0/3d0)**4*prefactor
           prefac2LQCD(i_mass)=-1d0/8d0*prefactor*3d0*(-1d0/3d0)**4&
                *CF/pipi
@@ -183,6 +187,7 @@ CONTAINS
           i_mass=i_mass+1
           mass(i_mass)=smass
           is_massive_quark(i_mass)=.TRUE.
+          massive_charge(i_mass)=-1d0/3d0
           prefac1L(i_mass)=3d0*(-1d0/3d0)**4*prefactor
           prefac2LQCD(i_mass)=-1d0/8d0*prefactor*3d0*(-1d0/3d0)**4&
                *CF/pipi
@@ -208,6 +213,7 @@ CONTAINS
           i_mass=i_mass+1
           mass(i_mass)=cmass
           is_massive_quark(i_mass)=.TRUE.
+          massive_charge(i_mass)=2d0/3d0
           prefac1L(i_mass)=3d0*(2d0/3d0)**4*prefactor
           prefac2LQCD(i_mass)=-1d0/8d0*prefactor*3d0*(2d0/3d0)**4&
                *CF/pipi
@@ -233,6 +239,7 @@ CONTAINS
           i_mass=i_mass+1
           mass(i_mass)=bmass
           is_massive_quark(i_mass)=.TRUE.
+          massive_charge(i_mass)=-1d0/3d0
           prefac1L(i_mass)=3d0*(-1d0/3d0)**4*prefactor
           prefac2LQCD(i_mass)=-1d0/8d0*prefactor*3d0*(-1d0/3d0)**4&
                *CF/pipi
@@ -258,6 +265,7 @@ CONTAINS
           i_mass=i_mass+1
           mass(i_mass)=tmass
           is_massive_quark(i_mass)=.TRUE.
+          massive_charge(i_mass)=2d0/3d0
           prefac1L(i_mass)=3d0*(2d0/3d0)**4*prefactor
           prefac2LQCD(i_mass)=-1d0/8d0*prefactor*3d0*(2d0/3d0)**4&
                *CF/pipi
@@ -284,6 +292,7 @@ CONTAINS
           i_mass=i_mass+1
           mass(i_mass)=emass
           is_massive_lepton(i_mass)=.TRUE.
+          massive_charge(i_mass)=-1d0
           prefac1L(i_mass)=(-1d0)**4*prefactor
           prefac2LQCD(i_mass)=0d0
           if(alpha_scheme.LE.1)then
@@ -308,6 +317,7 @@ CONTAINS
           i_mass=i_mass+1
           mass(i_mass)=mumass
           is_massive_lepton(i_mass)=.TRUE.
+          massive_charge(i_mass)=-1d0
           prefac1L(i_mass)=(-1d0)**4*prefactor
           prefac2LQCD(i_mass)=0d0
           if(alpha_scheme.LE.1)then
@@ -332,6 +342,7 @@ CONTAINS
           i_mass=i_mass+1
           mass(i_mass)=taumass
           is_massive_lepton(i_mass)=.TRUE.
+          massive_charge(i_mass)=-1d0
           prefac1L(i_mass)=(-1d0)**4*prefactor
           prefac2LQCD(i_mass)=0d0
           if(alpha_scheme.LE.1)then
@@ -348,6 +359,7 @@ CONTAINS
        ELSEIF(wmass.GT.0d0)THEN
           i_mass=i_mass+1
           mass(i_mass)=wmass
+          massive_charge(i_mass)=-1d0
           prefac1L(i_mass)=-1.5d0*prefactor
           prefac2LQCD(i_mass)=0d0
           prefac2LQED(i_mass)=0d0
@@ -1955,6 +1967,99 @@ CONTAINS
     fp=CF*MQ*2d0/muB*(-asmuB)*betaasmuB-1d0
     RETURN
   END SUBROUTINE SCALE_IN_MUB_EQ_QCD
+
+  SUBROUTINE Get_CoulRes_QEDScale(imass,xs,xiR,muR,scale)
+    USE LbL_Global
+    USE newton_method
+    USE evaluate_couplings
+    IMPLICIT NONE
+    INTEGER,INTENT(IN)::imass
+    REAL(KIND(1d0)),INTENT(IN)::xs,xiR,muR
+    REAL(KIND(1d0)),INTENT(OUT)::scale
+    INTEGER,SAVE::init=0
+    REAL(KIND(1d0)),DIMENSION(10),SAVE::muB
+    REAL(KIND(1d0))::muC,FPMUC,mf,EE,EEomf,muBF
+    REAL(KIND(1d0))::alphav
+    INTEGER::i
+    REAL(KIND(1d0)),PARAMETER::EEomfLow=-0.202041028867287607210863701176d0
+    REAL(KIND(1d0)),PARAMETER::EEomfUp=0.343145750507619804793245103161d0
+    IF(init.EQ.0)THEN
+       ! obtain mu_B for QED corrections to heavy fermions
+       muB(1:10)=0d0
+       DO i=1,i_mass
+          IF(.NOT.is_massive_quark(i).and..NOT.is_massive_lepton(i))CYCLE
+          IF(alpha_scheme.EQ.2)THEN
+             ! on-shell alpha(mu)
+             muC=mass(i)*massive_charge(i)**2/alphaemm1
+             MQ=mass(i) ! MQ will be used in SCALE_IN_MUB_EQ_QED
+             Qf2=massive_charge(i)**2 ! Qf2 will be used in SCALE_IN_MUB_EQ_QED
+             CALL newtonsolver(muC,FPMUC,SCALE_IN_MUB_EQ_QED,1D-14,-1)
+             IF(FPMUC.EQ.-1D99.OR.ISNAN(FPMUC).OR.1D0/FPMUC.EQ.0d0)THEN
+                PRINT *, "WARNING: Linear Newton procedure does not work !"
+                muB(i)=0d0
+             ENDIF
+             IF(muC.LT.0d0.or.ISNAN(muC))THEN
+                muB(i)=0d0
+             ELSE
+                muB(i)=muC
+             ENDIF
+          ELSE
+             ! use alpha(0) or Gmu scheme
+             alphav=ALPHAEW(0d0)
+             muB(i)=mass(i)*massive_charge(i)**2*alphav
+          ENDIF
+       ENDDO
+       init=1
+    ENDIF
+    IF(mass(imass).EQ.0d0)THEN
+       WRITE(*,*)"ERROR:: mass is zero in Get_CoulRes_QEDScale"
+       STOP
+    ENDIF
+    IF(.NOT.is_massive_quark(imass).and.is_massive_lepton(imass))THEN
+       WRITE(*,*)"ERROR: it is not a massive quark or lepton in Get_CoulRes_QEDScale"
+       STOP
+    ENDIF
+    mf=mass(imass)
+    EE=(dsqrt(xs)-2d0)*mf
+    EEomf=EE/mf
+    IF(EEomf.LE.EEomfLow.OR.EEomf.GE.EEomfUp)THEN
+       ! relativistic regimes
+       scale=muR
+       return
+    ENDIF
+    ! non-relativistic region
+    muBF=muB(imass)
+    scale=MAX(muBF,DSQRT(4d0*mf*DABS(EE)))
+    scale=scale*xiR
+    return
+  END SUBROUTINE Get_CoulRes_QEDScale
+
+  SUBROUTINE SCALE_IN_MUB_EQ_QED(muB,f,fp)
+    ! f(x)=Qf**2*mf*a(muB)-muB
+    USE LbL_Global
+    USE evaluate_couplings
+    IMPLICIT NONE
+    REAL(KIND(1d0)),INTENT(IN)::muB
+    REAL(KIND(1d0)),INTENT(OUT)::f,fp
+    REAL(KIND(1d0)),PARAMETER::twopi=6.28318530717958647692528676656d0
+    REAL(KIND(1d0))::amuB,amuBo2pi,betaamuB
+    IF(muB.LE.0d0.and.ISNAN(muB))THEN
+       PRINT *, "WARNING: THE CONVERGENCE OF LINEAR NEWTWON METHOD IS TOO BAD !"
+       PRINT *, "muB=",muB
+       f=0d0
+       fp=-1d99
+       RETURN
+    ENDIF
+    amuB=ALPHAEW(muB)
+    amuBo2pi=amuB/twopi
+    f=Qf2*MQ*amuB-muB
+    betaamuB=0d0
+    IF(alpha_nloop.GE.2)THEN
+       betaamuB=0d0
+    ENDIF
+    fp=Qf2*MQ*2d0/muB*(-amuB)*betaamuB-1d0
+    RETURN
+  END SUBROUTINE SCALE_IN_MUB_EQ_QED
   
   subroutine progress_LbL(j,nmax,forceinit)
     implicit none
