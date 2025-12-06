@@ -2050,7 +2050,8 @@ CONTAINS
     REAL(KIND(1d0)),PARAMETER::twopi=6.28318530717958647692528676656d0
     ! Exp[gamma_E]
     REAL(KIND(1d0)),PARAMETER::expgammaE=1.78107241799019798523650410311d0
-    REAL(KIND(1d0))::amuB,amuBo2pi,betaamuB
+    REAL(KIND(1d0))::amuB,amuBo2pi,DDeltaalphadLQ2
+    REAL(KIND(1d0))::damuBdLQ2
     IF(muB.LE.0d0.and.ISNAN(muB))THEN
        PRINT *, "WARNING: THE CONVERGENCE OF LINEAR NEWTWON METHOD IS TOO BAD !"
        PRINT *, "muB=",muB
@@ -2061,11 +2062,13 @@ CONTAINS
     amuB=ALPHAEW(muB)
     amuBo2pi=amuB/twopi
     f=expgammaE*Qf2*MQ*amuB-muB
-    betaamuB=0d0
-    IF(alpha_nloop.GE.2)THEN
-       betaamuB=0d0
-    ENDIF
-    fp=expgammaE*Qf2*MQ*2d0/muB*(-amuB)*betaamuB-1d0
+    ! D Delta alpha / d log(muB**2)
+    DDeltaalphadLQ2=DDeltaAlphaLepdLQ2(muB)
+    DDeltaalphadLQ2=DDeltaalphadLQ2+DDeltaAlphaHaddLQ2(muB)
+    DDeltaalphadLQ2=DDeltaalphadLQ2+DDeltaAlphaTopdLQ2(muB)
+    ! D alpha / d log(muB**2)
+    damuBdLQ2=amuB**2*alphaemm1*DDeltaalphadLQ2
+    fp=expgammaE*Qf2*MQ*damuBdLQ2*muB/2d0-1d0
     RETURN
   END SUBROUTINE SCALE_IN_MUB_EQ_QED
   

@@ -159,6 +159,21 @@ CONTAINS
              WRITE(*,*)"ERROR: the alpha RG running can only be from 1 to 2"
              STOP
           ENDIF
+          IF(abs(order).EQ.1.AND.alpha_nloop.EQ.2)THEN
+             ! Need two-loop alpha run (abs(order).eq.3, initialisation done)
+             ! set QCD colour factors
+             CALL SET_QCD_GROUP(QCD_CA,QCD_CF,QCD_TF)
+             ! initialisation for alpha_s running
+             CALL ReadElem_integer('alphas_nloop',alphas_nloop)
+             IF(alphas_nloop.LT.1.OR.alphas_nloop.GT.5)THEN
+                WRITE(*,*)"ERROR: the alphas RG running can only be from 1 to 5"
+                STOP
+             ENDIF
+             ! Q_THR_default is the OS mass (2)
+             ! the threshold is 1d0*quark_mass (1d0)
+             CALL as_run_init(as_box,alphasMZ,zmass_PDG,alphas_nloop,&
+                  no_fix_nf,Q_THR_default(4:6),2,1D0)
+          ENDIF
           ! evaluate Delta alpha^{(5)}_had from alpha(MZ) and alpha(0)
           Call Evaluate_DalphahadMZ(alphaemm1,alphaMZm1,zmass_PDG,&
                DalphahadMZ_PDG)
