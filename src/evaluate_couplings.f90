@@ -203,6 +203,45 @@ CONTAINS
     RETURN
   END FUNCTION ReSIGMAAA
 
+  FUNCTION ReBETAAA(Q,M)
+    ! one-loop perturbation result of
+    ! Beta(0,0) for a given fermion
+    ! It has been dropped 4*Ncf*Qf**2
+    IMPLICIT NONE
+    REAL(KIND(1d0))::ReBETAAA
+    REAL(KIND(1d0)),INTENT(IN)::Q,M
+    COMPLEX(KIND(1d0))::BETAAA
+    REAL(KIND(1d0))::MQ2Q2,LOGMQ2Q2
+    COMPLEX(KIND(1d0))::vf,vf2
+    MQ2Q2=M**2/Q**2
+    IF(4d0*MQ2Q2.EQ.1d0)THEN
+       ReBETAAA=-2d0/3d0
+       RETURN
+    ENDIF
+    IF(MQ2Q2.GT.1d-8.AND.MQ2Q2.LT.1d5)THEN
+       vf=SQRT(DCMPLX(1d0-4d0*MQ2Q2,0d0))
+       vf2=vf**2
+       BETAAA=-(5d0/3d0-vf2)/(1d0-vf2)-0.5d0*(vf-1d0/vf)*LOG((vf-1d0)/(vf+1d0))
+       BETAAA=MQ2Q2*BETAAA
+    ELSEIF(MQ2Q2.LE.1d-8)THEN
+       ! use the HE expansion when MQ2Q2 -> 0
+       LOGMQ2Q2=LOG(MQ2Q2)
+       BETAAA=-1d0/6d0-MQ2Q2+2d0*MQ2Q2**2*LOGMQ2Q2&
+            +4d0*MQ2Q2**3*(LOGMQ2Q2+1d0)&
+            +2d0*MQ2Q2**4*(6d0*LOGMQ2Q2+7d0)&
+            +4d0/3d0*MQ2Q2**5*(30d0*LOGMQ2Q2+37d0)
+    ELSEIF(MQ2Q2.GE.1d5)THEN
+       ! use the LE expansion when MQ2Q2 -> infinity
+       BETAAA=1d0/(30d0*MQ2Q2)+1d0/140d0/MQ2Q2**2+1d0/630d0/MQ2Q2**3&
+            +1d0/2772d0/MQ2Q2**4+1d0/12012d0/MQ2Q2**5+1d0/51480d0/MQ2Q2**6
+    ELSE
+       WRITE(*,*)"ERROR: cannot reach here ReBETAAA"
+       STOP
+    ENDIF
+    ReBETAAA=DREAL(BETAAA)
+    RETURN
+  END FUNCTION ReBETAAA
+
   FUNCTION ReSIGMAAA2L(Q,M)
     ! two-loop perturbation result of
     ! ReSigma_AA(Q)-Sigma_AA(0) for a given fermion
@@ -254,6 +293,67 @@ CONTAINS
     ReSIGMAAA2L=DREAL(SIGMAAA2L)
     RETURN
   END FUNCTION ReSIGMAAA2L
+
+  FUNCTION ReBETAAA2L(Q,M)
+    ! two-loop perturbation result of
+    ! Beta(1,0) and Beta(0,1) for a given fermion
+    ! It has been dropped 8*Ncf*Qf**4 for NLO QED
+    !                     8*Ncf*Qf**2*CFf for NLO QCD
+    IMPLICIT NONE
+    REAL(KIND(1d0))::ReBETAAA2L
+    REAL(KIND(1d0)),INTENT(IN)::Q,M
+    COMPLEX(KIND(1d0))::BETAAA2L
+    REAL(KIND(1d0))::MQ2Q2
+    COMPLEX(KIND(1d0))::LOGMQ2Q2,LOGMQ2Q22
+    COMPLEX(KIND(1d0))::vf,vf2,vf3,vf4,vfponeovervfmone,phi1,phi2,phi3,LL,LL2
+    REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
+    REAL(KIND(1d0)),PARAMETER::zeta2=1.64493406684822643647241516665d0
+    REAL(KIND(1d0)),PARAMETER::zeta3=1.20205690315959428539973816151d0
+    MQ2Q2=M**2/Q**2
+    IF(4d0*MQ2Q2.EQ.1d0)THEN
+       ! hit the threshold (divergence like -(pipi**2/(8*vf**2))
+       ! return zero
+       ReBETAAA2L=0d0
+       RETURN
+    ENDIF
+    IF(MQ2Q2.GT.1d-8.AND.MQ2Q2.LT.1d3)THEN
+       vf=SQRT(DCMPLX(1d0-4d0*MQ2Q2,0d0))
+       vf2=vf**2
+       vf3=vf2*vf
+       vf4=vf3*vf
+       vfponeovervfmone=(vf-1d0)/(vf+1d0)
+       phi1=phin(1,vfponeovervfmone)
+       phi2=phin(2,vfponeovervfmone)
+       phi3=phin(3,vfponeovervfmone)
+       LL=LOG(vfponeovervfmone)
+       LL2=LL**2
+       BETAAA2L=2d0*(vf2-1d0)*phi3+(4d0*(2d0*vf-vf3)/(3d0*(1d0-vf2))+4d0/3d0*(1d0-vf2)*LL)*phi2&
+            +(4d0*(vf3-2d0*vf)/(3d0*(1d0-vf2))*LL-(1d0-vf2)/3d0*LL2)*phi1&
+            +(1d0-vf)*(4d0+8d0*vf+13d0*vf2+2d0*vf3-3d0*vf4)/(8d0*vf2*(1d0+vf))*LL2&
+            -7d0/6d0*vf*LL-(1d0-vf2)*zeta3-(14d0-11d0*vf2)/(6d0*(1d0-vf2))
+       BETAAA2L=BETAAA2L*MQ2Q2
+    ELSEIF(MQ2Q2.LE.1d-8)THEN
+       ! use the HE expansion when MQ2Q2 -> 0
+       LOGMQ2Q2=DCMPLX(LOG(MQ2Q2),pipi)
+       LOGMQ2Q22=LOGMQ2Q2**2
+       BETAAA2L=-1d0/8d0-1.5d0*MQ2Q2*(LOGMQ2Q2+1d0)&
+            -MQ2Q2**2*(3d0*LOGMQ2Q22+0.5d0*LOGMQ2Q2-4d0*zeta3-17d0/12d0)&
+            +MQ2Q2**3*(29d0/3d0*LOGMQ2Q22+152d0/9d0*LOGMQ2Q2-278d0/27d0)&
+            +MQ2Q2**4*(203d0/6d0*LOGMQ2Q22+2575d0/36d0*LOGMQ2Q2-2173d0/432d0)&
+            +MQ2Q2**5*(1169d0/9d0*LOGMQ2Q22+75727d0/270d0*LOGMQ2Q2+8311d0/200d0)
+    ELSEIF(MQ2Q2.GE.1d3)THEN
+       ! use the LE expansion when MQ2Q2 -> infinity
+       BETAAA2L=41d0/324d0/MQ2Q2+449d0/10800d0/MQ2Q2**2&
+            +62479d0/5292000d0/MQ2Q2**3+25993d0/8164800d0/MQ2Q2**4&
+            +6756019d0/8068183200d0/MQ2Q2**5&
+            +338452951d0/1558311955200d0/MQ2Q2**6
+    ELSE
+       WRITE(*,*)"ERROR: cannot reach here ReBETAAA2L"
+       STOP
+    ENDIF
+    ReBETAAA2L=DREAL(BETAAA2L)
+    RETURN
+  END FUNCTION ReBETAAA2L
 
   ! Note W contribution is gauge dependent
   ! so that we should exclud it
@@ -322,6 +422,31 @@ CONTAINS
     RETURN
   END FUNCTION DeltaAlphaLep
 
+  FUNCTION DDeltaAlphaLepdLQ2(Q)
+    USE LbL_Global
+    ! one-loop, two loop QED
+    ! d Delta alpha_{lep}(Q)/dlog(Q**2)
+    IMPLICIT NONE
+    REAL(KIND(1d0))::DDeltaAlphaLepDLQ2
+    REAL(KIND(1d0))::DDeltaAlphaLepDLQ21L,DDeltaAlphaLepDLQ22L
+    REAL(KIND(1d0)),INTENT(IN)::Q
+    REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
+    DDeltaAlphaLepDLQ21L=ReBETAAA(Q,emass_PDG)
+    DDeltaAlphaLepDLQ21L=DDeltaAlphaLepDLQ21L+ReBETAAA(Q,mumass_PDG)
+    DDeltaAlphaLepDLQ21L=DDeltaAlphaLepDLQ21L+ReBETAAA(Q,taumass_PDG)
+    DDeltaAlphaLepDLQ21L=DDeltaAlphaLepDLQ21L*(-1d0/(2d0*pipi*alphaemm1))*4d0
+    IF(alpha_nloop.EQ.1)THEN
+       DDeltaAlphaLepdLQ2=DDeltaAlphaLepDLQ21L
+       RETURN
+    ENDIF
+    DDeltaAlphaLepDLQ22L=ReBETAAA2L(Q,emass_PDG)
+    DDeltaAlphaLepDLQ22L=DDeltaAlphaLepDLQ22L+ReBETAAA2L(Q,mumass_PDG)
+    DDeltaAlphaLepDLQ22L=DDeltaAlphaLepDLQ22L+ReBETAAA2L(Q,taumass_PDG)
+    DDeltaAlphaLepDLQ22L=DDeltaAlphaLepDLQ22L*(-1d0/(2d0*pipi*alphaemm1)**2)*8d0
+    DDeltaAlphaLepdLQ2=DDeltaAlphaLepDLQ21L+DDeltaAlphaLepDLQ22L
+    RETURN
+  END FUNCTION DDeltaAlphaLepdLQ2
+
   FUNCTION DeltaAlphaHad(Q)
     use LbL_Global
     ! one-loop, two loop QCD and QED
@@ -363,6 +488,47 @@ CONTAINS
     RETURN
   END FUNCTION DeltaAlphaHad
 
+  FUNCTION DDeltaAlphaHaddLQ2(Q)
+    use LbL_Global
+    ! one-loop, two loop QCD and QED
+    ! d Delta alpha_{had}(Q) / d log(Q**2) [only 5 quark flavours]
+    IMPLICIT NONE
+    REAL(KIND(1d0))::DDeltaAlphaHaddLQ2
+    REAL(KIND(1d0))::DDeltaAlphaHadDLQ21L,DDeltaAlphaHadDLQ22L
+    REAL(KIND(1d0))::DDeltaAlphaHadDLQ22LQCD,DDeltaAlphaHadDLQ22LQED
+    REAL(KIND(1d0)),INTENT(IN)::Q
+    REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
+    REAL(KIND(1d0)),PARAMETER::CF=4d0/3d0
+    REAL(KIND(1d0))::aSatQ
+    DDeltaAlphaHadDLQ21L=ReBETAAA(Q,umass_PDG)*(2d0/3d0)**2
+    DDeltaAlphaHadDLQ21L=DDeltaAlphaHadDLQ21L+ReBETAAA(Q,dmass_PDG)*(-1d0/3d0)**2
+    DDeltaAlphaHadDLQ21L=DDeltaAlphaHadDLQ21L+ReBETAAA(Q,smass_PDG)*(-1d0/3d0)**2
+    DDeltaAlphaHadDLQ21L=DDeltaAlphaHadDLQ21L+ReBETAAA(Q,cmass_PDG)*(2d0/3d0)**2
+    DDeltaAlphaHadDLQ21L=DDeltaAlphaHadDLQ21L+ReBETAAA(Q,bmass_PDG)*(-1d0/3d0)**2
+    DDeltaAlphaHadDLQ21L=DDeltaAlphaHadDLQ21L*(-1d0/(2d0*pipi*alphaemm1))*4d0*3d0
+    IF(alpha_nloop.EQ.1)THEN
+       DDeltaAlphaHaddLQ2=DDeltaAlphaHadDLQ21L
+       RETURN
+    ENDIF
+    IF(Q.GE.1d0)THEN
+       aSatQ=ALPHAS(Q)
+    ELSE
+       ! turn off two-loop QCD below 1 GeV
+       aSatQ=0d0
+    ENDIF
+    DDeltaAlphaHadDLQ22L=ReBETAAA2L(Q,umass_PDG)+ReBETAAA2L(Q,cmass_PDG)
+    DDeltaAlphaHadDLQ22LQED=DDeltaAlphaHadDLQ22L*(2d0/3d0)**4*(-1d0)/(2d0*pipi*alphaemm1)**2*8d0*3d0
+    DDeltaAlphaHadDLQ22LQCD=DDeltaAlphaHadDLQ22L*(2d0/3d0)**2*(-1d0)*CF*aSatQ/(4d0*pipi**2*alphaemm1)*8d0*3d0
+    DDeltaAlphaHadDLQ22L=ReBETAAA2L(Q,dmass_PDG)+ReBETAAA2L(Q,smass_PDG)&
+         +ReBETAAA2L(Q,bmass_PDG)
+    DDeltaAlphaHadDLQ22LQED=DDeltaAlphaHadDLQ22LQED+&
+         DDeltaAlphaHadDLQ22L*(-1d0/3d0)**4*(-1d0)/(2d0*pipi*alphaemm1)**2*8d0*3d0
+    DDeltaAlphaHadDLQ22LQCD=DDeltaAlphaHadDLQ22LQCD+&
+         DDeltaAlphaHadDLQ22L*(-1d0/3d0)**2*(-1d0)*CF*aSatQ/(4d0*pipi**2*alphaemm1)*8d0*3d0
+    DDeltaAlphaHaddLQ2=DDeltaAlphaHadDLQ21L+DDeltaAlphaHadDLQ22LQED+DDeltaAlphaHadDLQ22LQCD
+    RETURN
+  END FUNCTION DDeltaAlphaHaddLQ2
+
   FUNCTION DeltaAlphaTop(Q)
     use LbL_Global
     ! one-loop, two-loop QED and QCD
@@ -393,6 +559,37 @@ CONTAINS
     DeltaAlphaTop=DeltaAlphaTop1L+DeltaAlphaTop2LQED+DeltaAlphaTop2LQCD
     RETURN
   END FUNCTION DeltaAlphaTop
+
+  FUNCTION DDeltaAlphaTopdLQ2(Q)
+    use LbL_Global
+    ! one-loop, two-loop QED and QCD
+    ! d Delta alpha_{t}(Q) / d log(Q**2)
+    IMPLICIT NONE
+    REAL(KIND(1d0))::DDeltaAlphaTopdLQ2
+    REAL(KIND(1d0))::DDeltaAlphaTopDLQ21L,DDeltaAlphaTopDLQ22L
+    REAL(KIND(1d0))::DDeltaAlphaTopDLQ22LQCD,DDeltaAlphaTopDLQ22LQED
+    REAL(KIND(1d0)),INTENT(IN)::Q
+    REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
+    REAL(KIND(1d0)),PARAMETER::CF=4d0/3d0
+    REAL(KIND(1d0))::aSatQ
+    DDeltaAlphaTopDLQ21L=ReBETAAA(Q,tmass_PDG)*(2d0/3d0)**2
+    DDeltaAlphaTopDLQ21L=DDeltaAlphaTopDLQ21L*(-1d0/(2d0*pipi*alphaemm1))*4d0*3d0
+    IF(alpha_nloop.EQ.1)THEN
+       DDeltaAlphaTopdLQ2=DDeltaAlphaTopDLQ21L
+       RETURN
+    ENDIF
+    IF(Q.GE.1d0)THEN
+       aSatQ=ALPHAS(Q)
+    ELSE
+       ! turn off two-loop QCD below 1 GeV
+       aSatQ=0d0
+    ENDIF
+    DDeltaAlphaTopDLQ22L=ReBETAAA2L(Q,tmass_PDG)
+    DDeltaAlphaTopDLQ22LQED=DDeltaAlphaTopDLQ22L*(2d0/3d0)**4*(-1d0)/(2d0*pipi*alphaemm1)**2*8d0*3d0
+    DDeltaAlphaTopDLQ22LQCD=DDeltaAlphaTopDLQ22L*(2d0/3d0)**2*(-1d0)*CF*aSatQ/(4d0*pipi**2*alphaemm1)*8d0*3d0
+    DDeltaAlphaTopdLQ2=DDeltaAlphaTopDLQ21L+DDeltaAlphaTopDLQ22LQED+DDeltaAlphaTopDLQ22LQCD
+    RETURN
+  END FUNCTION DDeltaAlphaTopdLQ2
 
   ! Note W contribution is gauge dependent
   ! so that we should exclud it
