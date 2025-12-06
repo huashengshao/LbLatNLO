@@ -1884,6 +1884,8 @@ CONTAINS
     INTEGER::i
     REAL(KIND(1d0)),PARAMETER::EEomfLow=-0.202041028867287607210863701176d0
     REAL(KIND(1d0)),PARAMETER::EEomfUp=0.343145750507619804793245103161d0
+    ! Exp[gamma_E]
+    REAL(KIND(1d0)),PARAMETER::expgammaE=1.78107241799019798523650410311d0
     IF(init.EQ.0)THEN
        ! obtain mu_B for QCD corrections to heavy quarks
        muB(1:10)=0d0
@@ -1932,7 +1934,7 @@ CONTAINS
   END SUBROUTINE Get_CoulRes_QCDScale
 
   SUBROUTINE SCALE_IN_MUB_EQ_QCD(muB,f,fp)
-    ! f(x)=CF*mQ*as(muB)-muB
+    ! f(x)=e^gamma_E*CF*mQ*as(muB)-muB
     USE LbL_Global
     USE qcd_constants
     USE evaluate_couplings
@@ -1940,6 +1942,8 @@ CONTAINS
     REAL(KIND(1d0)),INTENT(IN)::muB
     REAL(KIND(1d0)),INTENT(OUT)::f,fp
     REAL(KIND(1d0)),PARAMETER::twopi=6.28318530717958647692528676656d0
+    ! Exp[gamma_E]
+    REAL(KIND(1d0)),PARAMETER::expgammaE=1.78107241799019798523650410311d0
     REAL(KIND(1d0))::asmuB,asmuBo2pi,betaasmuB
     IF(muB.LT.0.5d0.OR.ISNAN(muB))THEN
        PRINT *, "WARNING: THE CONVERGENCE OF LINEAR NEWTWON METHOD IS TOO BAD !"
@@ -1950,7 +1954,7 @@ CONTAINS
     ENDIF
     asmuB=ALPHAS(muB)
     asmuBo2pi=asmuB/twopi
-    f=CF*MQ*asmuB-muB
+    f=expgammaE*CF*MQ*asmuB-muB
     betaasmuB=beta0*asmuBo2pi
     IF(alphas_nloop.GE.2)THEN
        betaasmuB=betaasmuB+beta1*asmuBo2pi**2
@@ -1964,7 +1968,7 @@ CONTAINS
     IF(alphas_nloop.GE.5)THEN
        betaasmuB=betaasmuB+beta4*asmuBo2pi**5
     ENDIF
-    fp=CF*MQ*2d0/muB*(-asmuB)*betaasmuB-1d0
+    fp=expgammaE*CF*MQ*2d0/muB*(-asmuB)*betaasmuB-1d0
     RETURN
   END SUBROUTINE SCALE_IN_MUB_EQ_QCD
 
@@ -1983,6 +1987,8 @@ CONTAINS
     INTEGER::i
     REAL(KIND(1d0)),PARAMETER::EEomfLow=-0.202041028867287607210863701176d0
     REAL(KIND(1d0)),PARAMETER::EEomfUp=0.343145750507619804793245103161d0
+    ! Exp[gamma_E]
+    REAL(KIND(1d0)),PARAMETER::expgammaE=1.78107241799019798523650410311d0
     IF(init.EQ.0)THEN
        ! obtain mu_B for QED corrections to heavy fermions
        muB(1:10)=0d0
@@ -1990,7 +1996,7 @@ CONTAINS
           IF(.NOT.is_massive_quark(i).and..NOT.is_massive_lepton(i))CYCLE
           IF(alpha_scheme.EQ.2)THEN
              ! on-shell alpha(mu)
-             muC=mass(i)*massive_charge(i)**2/alphaemm1
+             muC=expgammaE*mass(i)*massive_charge(i)**2/alphaemm1
              MQ=mass(i) ! MQ will be used in SCALE_IN_MUB_EQ_QED
              Qf2=massive_charge(i)**2 ! Qf2 will be used in SCALE_IN_MUB_EQ_QED
              CALL newtonsolver(muC,FPMUC,SCALE_IN_MUB_EQ_QED,1D-14,-1)
@@ -2006,7 +2012,7 @@ CONTAINS
           ELSE
              ! use alpha(0) or Gmu scheme
              alphav=ALPHAEW(0d0)
-             muB(i)=mass(i)*massive_charge(i)**2*alphav
+             muB(i)=expgammaE*mass(i)*massive_charge(i)**2*alphav
           ENDIF
        ENDDO
        init=1
@@ -2035,13 +2041,15 @@ CONTAINS
   END SUBROUTINE Get_CoulRes_QEDScale
 
   SUBROUTINE SCALE_IN_MUB_EQ_QED(muB,f,fp)
-    ! f(x)=Qf**2*mf*a(muB)-muB
+    ! f(x)=e^(gammaE)*Qf**2*mf*a(muB)-muB
     USE LbL_Global
     USE evaluate_couplings
     IMPLICIT NONE
     REAL(KIND(1d0)),INTENT(IN)::muB
     REAL(KIND(1d0)),INTENT(OUT)::f,fp
     REAL(KIND(1d0)),PARAMETER::twopi=6.28318530717958647692528676656d0
+    ! Exp[gamma_E]
+    REAL(KIND(1d0)),PARAMETER::expgammaE=1.78107241799019798523650410311d0
     REAL(KIND(1d0))::amuB,amuBo2pi,betaamuB
     IF(muB.LE.0d0.and.ISNAN(muB))THEN
        PRINT *, "WARNING: THE CONVERGENCE OF LINEAR NEWTWON METHOD IS TOO BAD !"
@@ -2052,12 +2060,12 @@ CONTAINS
     ENDIF
     amuB=ALPHAEW(muB)
     amuBo2pi=amuB/twopi
-    f=Qf2*MQ*amuB-muB
+    f=expgammaE*Qf2*MQ*amuB-muB
     betaamuB=0d0
     IF(alpha_nloop.GE.2)THEN
        betaamuB=0d0
     ENDIF
-    fp=Qf2*MQ*2d0/muB*(-amuB)*betaamuB-1d0
+    fp=expgammaE*Qf2*MQ*2d0/muB*(-amuB)*betaamuB-1d0
     RETURN
   END SUBROUTINE SCALE_IN_MUB_EQ_QED
   
