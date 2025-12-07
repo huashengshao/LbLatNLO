@@ -308,12 +308,12 @@
       !   aS(muR)=aSmuR, aS(muC)=aSmuC, DC=-CF=-4/3 (for quarks) or 0 (for leptons)
       ! LP QED:
       !   a(muR)=aSmuR, a(muC)=aSmuC, DC=-Qf**2
-      subroutine Get_TwoLoop_HelAmp_LPCoulImproved(aSmuR,aSmuC,muC,
+      subroutine Get_TwoLoop_HelAmp_LPCoulImproved(aSmuR,aSmuC,muR,muC,
      $     DC,xs,mf,amp2L,amp2LLP)
       implicit none
       double complex amp2L(5),amp2LLP(5)
       double complex ampLP(5),amp1LCoul(5), amp2LCoul(5)
-      double precision aSmuR, aSmuC, muC, DC, xs, mf
+      double precision aSmuR, aSmuC, muR, muC, DC, xs, mf
       double precision mu2oM2
       double precision E,pref
       double precision pipi
@@ -337,7 +337,7 @@
       CALL Get_OneLoop_HelAmp_LPCoulombApproxNOA(xs,amp1LCoul)
       amp1LCoul(1)=amp1LCoul(1)/pref
       amp1LCoul(3)=amp1LCoul(3)/pref
-      mu2oM2=muC**2/mf**2
+      mu2oM2=muR**2/mf**2
       CALL Get_TwoLoop_HelAmp_LPCoulombApproxNOA(mu2oM2,xs,
      $     amp2LCoul)
       amp2LLP(1)=amp2L(1)+ampLP(1)-amp1LCoul(1)-amp2LCoul(1)
