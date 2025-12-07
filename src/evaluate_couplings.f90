@@ -296,7 +296,7 @@ CONTAINS
 
   FUNCTION ReBETAAA2L(Q,M)
     ! two-loop perturbation result of
-    ! Beta(1,0) and Beta(0,1) for a given fermion
+    ! Beta(1,0) (non beta(aS)) and Beta(0,1) for a given fermion
     ! It has been dropped 8*Ncf*Qf**4 for NLO QED
     !                     8*Ncf*Qf**2*CFf for NLO QCD
     IMPLICIT NONE
@@ -490,16 +490,18 @@ CONTAINS
 
   FUNCTION DDeltaAlphaHaddLQ2(Q)
     use LbL_Global
+    use qcd_constants
     ! one-loop, two loop QCD and QED
     ! d Delta alpha_{had}(Q) / d log(Q**2) [only 5 quark flavours]
     IMPLICIT NONE
     REAL(KIND(1d0))::DDeltaAlphaHaddLQ2
     REAL(KIND(1d0))::DDeltaAlphaHadDLQ21L,DDeltaAlphaHadDLQ22L
     REAL(KIND(1d0))::DDeltaAlphaHadDLQ22LQCD,DDeltaAlphaHadDLQ22LQED
+    REAL(KIND(1d0))::DeltaAlphaHad2L,DeltaAlphaHad2L1,DeltaAlphaHad2L2
     REAL(KIND(1d0)),INTENT(IN)::Q
     REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
-    REAL(KIND(1d0)),PARAMETER::CF=4d0/3d0
-    REAL(KIND(1d0))::aSatQ
+    !REAL(KIND(1d0)),PARAMETER::CF=4d0/3d0
+    REAL(KIND(1d0))::aSatQ,betaaS,aSatQtwopi
     DDeltaAlphaHadDLQ21L=ReBETAAA(Q,umass_PDG)*(2d0/3d0)**2
     DDeltaAlphaHadDLQ21L=DDeltaAlphaHadDLQ21L+ReBETAAA(Q,dmass_PDG)*(-1d0/3d0)**2
     DDeltaAlphaHadDLQ21L=DDeltaAlphaHadDLQ21L+ReBETAAA(Q,smass_PDG)*(-1d0/3d0)**2
@@ -525,6 +527,32 @@ CONTAINS
          DDeltaAlphaHadDLQ22L*(-1d0/3d0)**4*(-1d0)/(2d0*pipi*alphaemm1)**2*8d0*3d0
     DDeltaAlphaHadDLQ22LQCD=DDeltaAlphaHadDLQ22LQCD+&
          DDeltaAlphaHadDLQ22L*(-1d0/3d0)**2*(-1d0)*CF*aSatQ/(4d0*pipi**2*alphaemm1)*8d0*3d0
+    IF(aSatQ.GT.0d0)THEN
+       ! we should also determine the beta(aS) term
+       aSatQtwopi=aSatQ/(2d0*pipi)
+       ! betaaS=-beta(aS)/aS
+       betaaS=beta0*aSatQtwopi
+       IF(alphas_nloop.GE.2)THEN
+          betaaS=betaaS+beta1*aSatQtwopi**2
+       ENDIF
+       IF(alphas_nloop.GE.3)THEN
+          betaaS=betaaS+beta2*aSatQtwopi**3
+       ENDIF
+       IF(alphas_nloop.GE.4)THEN
+          betaaS=betaaS+beta3*aSatQtwopi**4
+       ENDIF
+       IF(alphas_nloop.GE.5)THEN
+          betaaS=betaaS+beta4*aSatQtwopi**5
+       ENDIF
+       DeltaAlphaHad2L1=ReSIGMAAA2L(Q,umass_PDG)+ReSIGMAAA2L(Q,cmass_PDG)
+       DeltaAlphaHad2L1=DeltaAlphaHad2L1*(2d0/3d0)**2
+       DeltaAlphaHad2L2=ReSIGMAAA2L(Q,dmass_PDG)+ReSIGMAAA2L(Q,smass_PDG)&
+            +ReSIGMAAA2L(Q,bmass_PDG)
+       DeltaAlphaHad2L2=DeltaAlphaHad2L2*(-1d0/3d0)**2
+       DeltaAlphaHad2L=DeltaAlphaHad2L1+DeltaAlphaHad2L2
+       DeltaAlphaHad2L=DeltaAlphaHad2L*(3d0)*CF*(betaaS)*(aSatQ/(pipi**2*alphaemm1))
+       DDeltaAlphaHadDLQ22LQCD=DDeltaAlphaHadDLQ22LQCD+DeltaAlphaHad2L
+    ENDIF
     DDeltaAlphaHaddLQ2=DDeltaAlphaHadDLQ21L+DDeltaAlphaHadDLQ22LQED+DDeltaAlphaHadDLQ22LQCD
     RETURN
   END FUNCTION DDeltaAlphaHaddLQ2
@@ -562,16 +590,18 @@ CONTAINS
 
   FUNCTION DDeltaAlphaTopdLQ2(Q)
     use LbL_Global
+    use qcd_constants
     ! one-loop, two-loop QED and QCD
     ! d Delta alpha_{t}(Q) / d log(Q**2)
     IMPLICIT NONE
     REAL(KIND(1d0))::DDeltaAlphaTopdLQ2
     REAL(KIND(1d0))::DDeltaAlphaTopDLQ21L,DDeltaAlphaTopDLQ22L
     REAL(KIND(1d0))::DDeltaAlphaTopDLQ22LQCD,DDeltaAlphaTopDLQ22LQED
+    REAL(KIND(1d0))::DeltaAlphaTop2L
     REAL(KIND(1d0)),INTENT(IN)::Q
     REAL(KIND(1d0)),PARAMETER::pipi=3.14159265358979323846264338328d0
-    REAL(KIND(1d0)),PARAMETER::CF=4d0/3d0
-    REAL(KIND(1d0))::aSatQ
+    !REAL(KIND(1d0)),PARAMETER::CF=4d0/3d0
+    REAL(KIND(1d0))::aSatQ,betaaS,aSatQtwopi
     DDeltaAlphaTopDLQ21L=ReBETAAA(Q,tmass_PDG)*(2d0/3d0)**2
     DDeltaAlphaTopDLQ21L=DDeltaAlphaTopDLQ21L*(-1d0/(2d0*pipi*alphaemm1))*4d0*3d0
     IF(alpha_nloop.EQ.1)THEN
@@ -587,6 +617,28 @@ CONTAINS
     DDeltaAlphaTopDLQ22L=ReBETAAA2L(Q,tmass_PDG)
     DDeltaAlphaTopDLQ22LQED=DDeltaAlphaTopDLQ22L*(2d0/3d0)**4*(-1d0)/(2d0*pipi*alphaemm1)**2*8d0*3d0
     DDeltaAlphaTopDLQ22LQCD=DDeltaAlphaTopDLQ22L*(2d0/3d0)**2*(-1d0)*CF*aSatQ/(4d0*pipi**2*alphaemm1)*8d0*3d0
+    IF(aSatQ.GT.0d0)THEN
+       ! we should also determine the beta(aS) term
+       aSatQtwopi=aSatQ/(2d0*pipi)
+       ! betaaS=-beta(aS)/aS
+       betaaS=beta0*aSatQtwopi
+       IF(alphas_nloop.GE.2)THEN
+          betaaS=betaaS+beta1*aSatQtwopi**2
+       ENDIF
+       IF(alphas_nloop.GE.3)THEN
+          betaaS=betaaS+beta2*aSatQtwopi**3
+       ENDIF
+       IF(alphas_nloop.GE.4)THEN
+          betaaS=betaaS+beta3*aSatQtwopi**4
+       ENDIF
+       IF(alphas_nloop.GE.5)THEN
+          betaaS=betaaS+beta4*aSatQtwopi**5
+       ENDIF
+       DeltaAlphaTop2L=ReSIGMAAA2L(Q,tmass_PDG)
+       DeltaAlphaTop2L=DeltaAlphaTop2L*(2d0/3d0)**2
+       DeltaAlphaTop2L=DeltaAlphaTop2L*(3d0)*CF*(betaaS)*(aSatQ/(pipi**2*alphaemm1))
+       DDeltaAlphaTopDLQ22LQCD=DDeltaAlphaTopDLQ22LQCD+DeltaAlphaTop2L
+    ENDIF
     DDeltaAlphaTopdLQ2=DDeltaAlphaTopDLQ21L+DDeltaAlphaTopDLQ22LQED+DDeltaAlphaTopDLQ22LQCD
     RETURN
   END FUNCTION DDeltaAlphaTopdLQ2
