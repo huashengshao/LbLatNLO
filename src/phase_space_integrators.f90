@@ -203,7 +203,8 @@ CONTAINS
 
     ! reweighting stuff
     CALL ReadElem_logic('reweight_Scale',reweight_scale)
-    IF(order.EQ.0.OR.(abs(order).EQ.1.AND.alpha_scheme.LE.1))THEN
+    IF(order.EQ.0.OR.(abs(order).EQ.1.AND.alpha_scheme.LE.1&
+         .AND.coulomb.eq.0))THEN
        ! no need to reweight the scale for LO
        ! and NLO QED with alpha(0) or Gmu scheme
        reweight_scale=.FALSE.

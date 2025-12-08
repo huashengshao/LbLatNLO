@@ -29,16 +29,16 @@ order -3
 coulomb 1
 
 # masses (negative means we will not include such a contribution)
-emass  -1d0           # electron mass (pole mass)
-mumass  -1d0          # muon mass (pole mass)
+emass  5.11d-4           # electron mass (pole mass)
+mumass  0.105d0          # muon mass (pole mass)
 taumass 1.77686d0      # tau mass (pole mass)
-umass -1d0            # up quark mass (pole mass)
-dmass -1d0            # down quark mass (pole mass)
-smass -1d0            # strange quark mass (pole mass)
+umass 0.340d0            # up quark mass (pole mass)
+dmass 0.345d0            # down quark mass (pole mass)
+smass 0.458d0            # strange quark mass (pole mass)
 cmass 1.5d0            # charm quark mass (pole mass)
-bmass -1d0           # bottom quark mass (pole mass)
-tmass -1d0         # top quark mass (pole mass)
-wmass -1d0         # W mass
+bmass 4.75d0           # bottom quark mass (pole mass)
+tmass 173d0         # top quark mass (pole mass)
+wmass 80.49d0         # W mass
 
 # couplings
 alphaemm1     137.036d0    # alpha(0)**(-1)

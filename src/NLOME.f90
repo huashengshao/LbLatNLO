@@ -5,7 +5,7 @@ MODULE NLOME
   logical,dimension(10),save,private::is_massive_lepton
   real(kind(1d0)),dimension(10),save,private::massive_charge
   integer,save,private::i_mass,i_massless
-  real(kind(1d0)),save,private::MQ,Qf2
+  real(kind(1d0)),save,private::MQc,Qf2
 CONTAINS
   subroutine stwoloopmatrix_LbL(pborn,virt_wgts)
     use kinetics
@@ -23,12 +23,16 @@ CONTAINS
     double precision virt_wgts,virt_wgts_up,virt_wgts_down
     double precision pborn(4,0:3)
     double precision shat,that,uhat
-    double precision xs,xt,xu,MQ,MQ2,MQ4,MUR
+    double precision xs,xt,xu,MQ,MQ2,MQ4,MUR,MUR_up,MUR_down,DC
+    double precision MUCQCD_cen,MUCQCD_up,MUCQCD_down
+    double precision MUCQED_cen,MUCQED_up,MUCQED_down
     double precision logm2omu2
     double complex loopba1L(NDIM_1L),loopba1L2(NDIM_1L)
     double complex loopba2L(NDIM_2L)
     double complex amp1L(5),camp1L(5),amptmp,amptmpp,amptmpp2
     double complex amp2L(5),camp2L(5),ampstmp(5)
+    double complex ampstmpQCDLP_cen(5),ampstmpQCDLP_up(5),ampstmpQCDLP_down(5)
+    double complex ampstmpQEDLP_cen(5),ampstmpQEDLP_up(5),ampstmpQEDLP_down(5)
     double complex amp2L_up(5),camp2L_up(5)
     double complex amp2L_down(5),camp2L_down(5)
     integer i,j ! ,kk1
@@ -88,6 +92,8 @@ CONTAINS
     parameter (pipi=3.14159265358979323846264338328d0)
     double precision alpham1,as_cen,as_up,as_down
     double precision aew_cen,aew_up,aew_down
+    double precision asmuC_cen,asmuC_up,asmuC_down
+    double precision aewmuC_cen,aewmuC_up,aewmuC_down
     !OPEN(UNIT=20333,FILE="alpha.dat")
     !DO i_mass=-10,10
     !   DO i_massless=0,90
@@ -378,13 +384,17 @@ CONTAINS
     amp2L_down(1:5)=amp2L(1:5)
     wgtxsecmu(1:3)=1d0
     CALL LbL_scale(MUR)
+    IF(abs(order).ge.1.and.reweight_scale)then
+       MUR_up=MUR*rw_RScale_up
+       MUR_down=MUR*rw_RScale_down
+    endif
     if(abs(order).ge.2)then
        ! we must have QCD corrections
        as_cen=ALPHAS(MUR)
        AQCDUP=as_cen
        if(reweight_scale)then
-          as_up=ALPHAS(MUR*rw_RScale_up)
-          as_down=ALPHAS(MUR*rw_RScale_down)
+          as_up=ALPHAS(MUR_up)
+          as_down=ALPHAS(MUR_down)
        else
           as_up=as_cen
           as_down=as_cen
@@ -396,12 +406,20 @@ CONTAINS
        aew_cen=ALPHAEW(MUR)
        AQEDUP=aew_cen
        if(reweight_scale)then
-          aew_up=ALPHAEW(MUR*rw_RScale_up)
-          aew_down=ALPHAEW(MUR*rw_RScale_down)
+          aew_up=ALPHAEW(MUR_up)
+          aew_down=ALPHAEW(MUR_down)
        else
           aew_up=aew_cen
           aew_down=aew_cen
        endif
+    else
+       aew_cen=AQEDUP
+       aew_up=aew_cen
+       aew_down=aew_cen
+       ! alpha at Coulomb scale (frozen if alpha_scheme.ne.2)
+       aewmuC_cen=aew_cen
+       aewmuC_up=aew_up
+       aewmuC_down=aew_down
     endif
 
     ! massless fermion loops
@@ -496,6 +514,7 @@ CONTAINS
           ENDDO
        else
           ! it is the massive fermion
+          ! one-loop massive amplitudes first
           DO j=1,5
              if(improve_w_LE.NE.1)then
                 amptmp=OneLoop_HelAmp_Massive(j,xs,xt,xu,loopba1L2)
@@ -529,6 +548,49 @@ CONTAINS
        if(abs(order).GT.0)then
           if((i.lt.i_mass.and.wmass.GT.0d0).or.wmass.LT.0d0)then
              ! we do not have NLO for W boson
+             
+             IF(coulomb.EQ.1)THEN
+                ! we need to do coulomb resummation
+                ! obtain the MUCQCD and MUCQED (Coulomb scales)
+                IF(abs(order).eq.2.or.abs(order).eq.3)then
+                   CALL Get_CoulRes_QCDScale(i,xs,1d0,MUR,MUCQCD_cen)
+                   aSmuC_cen=ALPHAS(MUCQCD_cen)
+                   if(reweight_scale)then
+                      CALL Get_CoulRes_QCDScale(i,xs,rw_RScale_up,MUR,MUCQCD_up)
+                      CALL Get_CoulRes_QCDScale(i,xs,rw_RScale_down,MUR,&
+                           MUCQCD_down)
+                      aSmuC_up=ALPHAS(MUCQCD_up)
+                      aSmuC_down=ALPHAS(MUCQCD_down)
+                   ELSE
+                      MUCQCD_up=MUCQCD_cen
+                      MUCQCD_down=MUCQCD_cen
+                      aSmuC_up=aSmuC_cen
+                      aSmuC_down=aSmuC_cen
+                   endif
+                ENDIF
+                IF(abs(order).eq.1.or.abs(order).eq.3)then
+                   CALL Get_CoulRes_QEDScale(i,xs,1d0,MUR,MUCQED_cen)
+                   if(reweight_scale)then
+                      CALL Get_CoulRes_QEDScale(i,xs,rw_RScale_up,MUR,MUCQED_up)
+                      CALL Get_CoulRes_QEDScale(i,xs,rw_RScale_down,MUR,&
+                           MUCQED_down)
+                   ELSE
+                      MUCQED_up=MUCQED_cen
+                      MUCQED_down=MUCQED_cen
+                   endif
+                   IF(alpha_scheme.eq.2)THEN
+                      aewmuC_cen=ALPHAEW(MUCQED_cen)
+                      IF(reweight_scale)then
+                         aewmuC_up=ALPHAEW(MUCQED_up)
+                         aewmuC_down=ALPHAEW(MUCQED_down)
+                      ELSE
+                         aewmuC_up=aewmuC_cen
+                         aewmuC_down=aewmuC_cen
+                      endif
+                   ENDIF
+                endif
+             ENDIF
+             
              ! 1d8 and 1d-2 relate to INTEGER::NXMIN=-2,NXMAX=8 in eval_twoloop_massive_amplitudes
              if(improve_w_LE.EQ.0.OR.(improve_w_LE.EQ.-1&
                   .and.xs.LE.1d8.and.xs.GE.1d-2))then
@@ -583,6 +645,33 @@ CONTAINS
                    ampstmp(j)=amptmp
                 ENDDO
              endif
+             
+             IF(coulomb.EQ.1)then
+                ! we need to do coulomb resummation
+                IF(abs(order).EQ.2.OR.abs(order).EQ.3)THEN
+                   DC=-4d0/3d0
+                   CALL Get_TwoLoop_HelAmp_LPCoulImproved(as_cen,aSmuC_cen,&
+                        MUR,MUCQCD_cen,DC,xs,MQ,ampstmp,ampstmpQCDLP_cen)
+                   IF(reweight_scale)THEN
+                      CALL Get_TwoLoop_HelAmp_LPCoulImproved(as_up,aSmuC_up,&
+                           MUR_up,MUCQCD_up,DC,xs,MQ,ampstmp,ampstmpQCDLP_up)
+                      CALL Get_TwoLoop_HelAmp_LPCoulImproved(as_down,aSmuC_down,&
+                           MUR_down,MUCQCD_down,DC,xs,MQ,ampstmp,ampstmpQCDLP_down)
+                   ENDIF
+                ENDIF
+                IF(abs(order).EQ.1.OR.abs(order).EQ.3)THEN
+                   DC=-massive_charge(i)**2
+                   CALL Get_TwoLoop_HelAmp_LPCoulImproved(aew_cen,aewmuC_cen,&
+                        MUR,MUCQED_cen,DC,xs,MQ,ampstmp,ampstmpQEDLP_cen)
+                   IF(reweight_scale)THEN
+                      CALL Get_TwoLoop_HelAmp_LPCoulImproved(aew_up,aewmuC_up,&
+                           MUR_up,MUCQED_up,DC,xs,MQ,ampstmp,ampstmpQEDLP_up)
+                      CALL Get_TwoLoop_HelAmp_LPCoulImproved(aew_down,aewmuC_down,&
+                           MUR_down,MUCQED_down,DC,xs,MQ,ampstmp,ampstmpQEDLP_down)
+                   ENDIF
+                ENDIF
+             endif
+             
              ! ! first multiply sqrts in the one-loop integrals that appeared
              ! ! at one-loop
              ! CALL UToneloopbasis_nosqrt(xs,xt,loopba1L2,loopba1L)
@@ -593,51 +682,118 @@ CONTAINS
              !     ,ampstmp)
              if(abs(order).eq.2.and.prefac2LQCD(i).NE.0d0)then
                 ! only QCD
-                DO j=1,5
-                   amptmp=ampstmp(j)
-                   amp2L_up(j)=amp2L_up(j)+amptmp*prefac2LQCD(i)*as_up
-                   amp2L_down(j)=amp2L_down(j)+amptmp*prefac2LQCD(i)*as_down
-                   amp2L(j)=amp2L(j)+amptmp*prefac2LQCD(i)*as_cen
-                ENDDO
+                IF(coulomb.EQ.0)then
+                   DO j=1,5
+                      amptmp=ampstmp(j)
+                      amp2L_up(j)=amp2L_up(j)+amptmp*prefac2LQCD(i)*as_up
+                      amp2L_down(j)=amp2L_down(j)+amptmp*prefac2LQCD(i)*as_down
+                      amp2L(j)=amp2L(j)+amptmp*prefac2LQCD(i)*as_cen
+                   ENDDO
+                ELSE
+                   ! including Coulomb resummation
+                   DO j=1,5
+                      amp2L(j)=amp2L(j)+ampstmpQCDLP_cen(j)*prefac2LQCD(i)*as_cen
+                      IF(reweight_scale)then
+                         amp2L_up(j)=amp2L_up(j)+ampstmpQCDLP_up(j)*prefac2LQCD(i)*as_up
+                         amp2L_down(j)=amp2L_down(j)+ampstmpQCDLP_down(j)&
+                              *prefac2LQCD(i)*as_down
+                      ENDIF
+                   ENDDO
+                ENDIF
              elseif(abs(order).eq.1)then
                 ! only QED
-                if(alpha_scheme.eq.2)then
-                   DO j=1,5
-                      amptmp=ampstmp(j)
-                      amp2L(j)=amp2L(j)+amptmp*prefac2LQED(i)*aew_cen
-                      amp2L_up(j)=amp2L_up(j)+amptmp*prefac2LQED(i)*aew_up
-                      amp2L_down(j)=amp2L_down(j)+amptmp*prefac2LQED(i)*aew_down
-                   ENDDO
-                else
-                   DO j=1,5
-                      amptmp=ampstmp(j)
-                      amp2L(j)=amp2L(j)+amptmp*prefac2LQED(i)
-                      amp2L_up(j)=amp2L_up(j)+amptmp*prefac2LQED(i)
-                      amp2L_down(j)=amp2L_down(j)+amptmp*prefac2LQED(i)
-                   ENDDO
-                endif
+                IF(coulomb.eq.0)then
+                   if(alpha_scheme.eq.2)then
+                      DO j=1,5
+                         amptmp=ampstmp(j)
+                         amp2L(j)=amp2L(j)+amptmp*prefac2LQED(i)*aew_cen
+                         amp2L_up(j)=amp2L_up(j)+amptmp*prefac2LQED(i)*aew_up
+                         amp2L_down(j)=amp2L_down(j)+amptmp*prefac2LQED(i)*aew_down
+                      ENDDO
+                   else
+                      ! in this case, prefac2LQED contains aew_cen=aew_up=aew_down
+                      DO j=1,5
+                         amptmp=ampstmp(j)
+                         amp2L(j)=amp2L(j)+amptmp*prefac2LQED(i)
+                         amp2L_up(j)=amp2L_up(j)+amptmp*prefac2LQED(i)
+                         amp2L_down(j)=amp2L_down(j)+amptmp*prefac2LQED(i)
+                      ENDDO
+                   endif
+                ELSE
+                   ! including Coulomb resummation
+                   IF(alpha_scheme.eq.2)then
+                      DO j=1,5
+                         amp2L(j)=amp2L(j)+ampstmpQEDLP_cen(j)*prefac2LQED(i)*aew_cen
+                         IF(reweight_scale)then
+                            amp2L_up(j)=amp2L_up(j)+ampstmpQEDLP_up(j)&
+                                 *prefac2LQED(i)*aew_up
+                            amp2L_down(j)=amp2L_down(j)+ampstmpQEDLP_down(j)&
+                                 *prefac2LQED(i)*aew_down
+                         ENDIF
+                      ENDDO
+                   ELSE
+                      ! in this case, prefac2LQED contains aew_cen=aew_up=aew_down
+                      DO j=1,5
+                         amp2L(j)=amp2L(j)+ampstmpQEDLP_cen(j)*prefac2LQED(i)
+                         IF(reweight_scale)THEN
+                            amp2L_up(j)=amp2L_up(j)+ampstmpQEDLP_up(j)&
+                                 *prefac2LQED(i)
+                            amp2L_down(j)=amp2L_down(j)+ampstmpQEDLP_down(j)&
+                                 *prefac2LQED(i)
+                         ENDIF
+                      ENDDO
+                   ENDIF
+                ENDIF
              else
                 ! QED+QCD
-                if(alpha_scheme.eq.2)then
-                   DO j=1,5
-                      amptmp=ampstmp(j)
-                      amp2L(j)=amp2L(j)+amptmp*(prefac2LQCD(i)*as_cen&
-                           +prefac2LQED(i)*aew_cen)
-                      amp2L_up(j)=amp2L_up(j)+amptmp*(prefac2LQCD(i)*as_up&
-                           +prefac2LQED(i)*aew_up)
-                      amp2L_down(j)=amp2L_down(j)+amptmp*(prefac2LQCD(i)*as_down&
-                           +prefac2LQED(i)*aew_down)
-                   ENDDO
+                IF(coulomb.eq.0)then
+                   if(alpha_scheme.eq.2)then
+                      DO j=1,5
+                         amptmp=ampstmp(j)
+                         amp2L(j)=amp2L(j)+amptmp*(prefac2LQCD(i)*as_cen&
+                              +prefac2LQED(i)*aew_cen)
+                         amp2L_up(j)=amp2L_up(j)+amptmp*(prefac2LQCD(i)*as_up&
+                              +prefac2LQED(i)*aew_up)
+                         amp2L_down(j)=amp2L_down(j)+amptmp*(prefac2LQCD(i)*as_down&
+                              +prefac2LQED(i)*aew_down)
+                      ENDDO
+                   else
+                      DO j=1,5
+                         amptmp=ampstmp(j)
+                         amp2L(j)=amp2L(j)+amptmp*(prefac2LQCD(i)*as_cen&
+                              +prefac2LQED(i))
+                         amp2L_up(j)=amp2L_up(j)+amptmp*(prefac2LQCD(i)*as_up&
+                              +prefac2LQED(i))
+                         amp2L_down(j)=amp2L_down(j)+amptmp*(prefac2LQCD(i)*as_down&
+                              +prefac2LQED(i))
+                      ENDDO
+                   endif
                 else
-                   DO j=1,5
-                      amptmp=ampstmp(j)
-                      amp2L(j)=amp2L(j)+amptmp*(prefac2LQCD(i)*as_cen&
-                           +prefac2LQED(i))
-                      amp2L_up(j)=amp2L_up(j)+amptmp*(prefac2LQCD(i)*as_up&
-                           +prefac2LQED(i))
-                      amp2L_down(j)=amp2L_down(j)+amptmp*(prefac2LQCD(i)*as_down&
-                           +prefac2LQED(i))
-                   ENDDO
+                   ! including Coulomb resummation
+                   IF(alpha_scheme.eq.2)then
+                      DO j=1,5
+                         amp2L(j)=amp2L(j)+ampstmpQCDLP_cen(j)*prefac2LQCD(i)*as_cen&
+                              +ampstmpQEDLP_cen(j)*prefac2LQED(i)*aew_cen
+                         IF(reweight_scale)THEN
+                            amp2L_up(j)=amp2L_up(j)+ampstmpQCDLP_up(j)*prefac2LQCD(i)&
+                                 *as_up+ampstmpQEDLP_up(j)*prefac2LQED(i)*aew_up
+                            amp2L_down(j)=amp2L_down(j)+ampstmpQCDLP_down(j)*prefac2LQCD(i)&
+                                 *as_down+ampstmpQEDLP_down(j)*prefac2LQED(i)*aew_down
+                         ENDIF
+                      ENDDO
+                   ELSE
+                      ! in this case, prefac2LQED contains aew_cen=aew_up=aew_down
+                      DO j=1,5
+                         amp2L(j)=amp2L(j)+ampstmpQCDLP_cen(j)*prefac2LQCD(i)*as_cen&
+                              +ampstmpQEDLP_cen(j)*prefac2LQED(i)
+                         IF(reweight_scale)THEN
+                            amp2L_up(j)=amp2L_up(j)+ampstmpQCDLP_up(j)*prefac2LQCD(i)&
+                                 *as_up+ampstmpQEDLP_up(j)*prefac2LQED(i)
+                            amp2L_down(j)=amp2L_down(j)+ampstmpQCDLP_down(j)*prefac2LQCD(i)&
+                                 *as_down+ampstmpQEDLP_down(j)*prefac2LQED(i)
+                         ENDIF
+                      ENDDO
+                   endif
                 endif
              endif
           endif
@@ -1896,7 +2052,7 @@ CONTAINS
              CYCLE
           ENDIF
           muC=MAX(mass(i)/3d0,1d0)
-          MQ=mass(i) ! MQ will be used in SCALE_IN_MUB_EQ_QCD
+          MQc=mass(i) ! MQc will be used in SCALE_IN_MUB_EQ_QCD
           CALL newtonsolver(muC,FPMUC,SCALE_IN_MUB_EQ_QCD,1D-14,-1)
           IF(FPMUC.EQ.-1D99.OR.ISNAN(FPMUC).OR.1D0/FPMUC.EQ.0d0)THEN
              PRINT *, "WARNING: Linear Newton procedure does not work !"
@@ -1954,7 +2110,7 @@ CONTAINS
     ENDIF
     asmuB=ALPHAS(muB)
     asmuBo2pi=asmuB/twopi
-    f=expgammaE*CF*MQ*asmuB-muB
+    f=expgammaE*CF*MQc*asmuB-muB
     betaasmuB=beta0*asmuBo2pi
     IF(alphas_nloop.GE.2)THEN
        betaasmuB=betaasmuB+beta1*asmuBo2pi**2
@@ -1968,7 +2124,7 @@ CONTAINS
     IF(alphas_nloop.GE.5)THEN
        betaasmuB=betaasmuB+beta4*asmuBo2pi**5
     ENDIF
-    fp=expgammaE*CF*MQ*2d0/muB*(-asmuB)*betaasmuB-1d0
+    fp=expgammaE*CF*MQc*2d0/muB*(-asmuB)*betaasmuB-1d0
     RETURN
   END SUBROUTINE SCALE_IN_MUB_EQ_QCD
 
@@ -1997,7 +2153,7 @@ CONTAINS
           IF(alpha_scheme.EQ.2)THEN
              ! on-shell alpha(mu)
              muC=expgammaE*mass(i)*massive_charge(i)**2/alphaemm1
-             MQ=mass(i) ! MQ will be used in SCALE_IN_MUB_EQ_QED
+             MQc=mass(i) ! MQc will be used in SCALE_IN_MUB_EQ_QED
              Qf2=massive_charge(i)**2 ! Qf2 will be used in SCALE_IN_MUB_EQ_QED
              CALL newtonsolver(muC,FPMUC,SCALE_IN_MUB_EQ_QED,1D-14,-1)
              IF(FPMUC.EQ.-1D99.OR.ISNAN(FPMUC).OR.1D0/FPMUC.EQ.0d0)THEN
@@ -2061,14 +2217,14 @@ CONTAINS
     ENDIF
     amuB=ALPHAEW(muB)
     amuBo2pi=amuB/twopi
-    f=expgammaE*Qf2*MQ*amuB-muB
+    f=expgammaE*Qf2*MQc*amuB-muB
     ! D Delta alpha / d log(muB**2)
     DDeltaalphadLQ2=DDeltaAlphaLepdLQ2(muB)
     DDeltaalphadLQ2=DDeltaalphadLQ2+DDeltaAlphaHaddLQ2(muB)
     DDeltaalphadLQ2=DDeltaalphadLQ2+DDeltaAlphaTopdLQ2(muB)
     ! D alpha / d log(muB**2)
     damuBdLQ2=amuB**2*alphaemm1*DDeltaalphadLQ2
-    fp=expgammaE*Qf2*MQ*damuBdLQ2*muB/2d0-1d0
+    fp=expgammaE*Qf2*MQc*damuBdLQ2*muB/2d0-1d0
     RETURN
   END SUBROUTINE SCALE_IN_MUB_EQ_QED
   
