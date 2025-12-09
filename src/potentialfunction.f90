@@ -265,7 +265,15 @@ CONTAINS
        else
           gf2=gf
        endif
-       z=1d0+D1*aS/(2d0*SQRT(dcmplx(-E/mf,-gf2/mf)))
+       IF(gf.EQ.0d0.AND.E.LT.0d0)THEN
+          !we should reinterpret polygamma(0,1+x) as polygamma(0,-x) when x<-1/2
+          z=-D1*aS/(2d0*SQRT(dcmplx(-E/mf,0d0)))
+          IF(DREAL(z).LE.0.5d0)THEN
+             z=1d0-z
+          ENDIF
+       ELSE
+          z=1d0+D1*aS/(2d0*SQRT(dcmplx(-E/mf,-gf2/mf)))
+       ENDIF
        res=DREAL(-mf**2/(4d0*pipi)*(SQRT(-dcmplx(E,gf2)/mf)&
             -D1*aS*(0.5d0*LOG(4d0*mf/muC**2*dcmplx(-E,-gf2))&
             -0.5d0+gammaE+polygamma(0,z))))
@@ -278,7 +286,15 @@ CONTAINS
        Em=DSQRT(mf/2d0*(DSQRT(E**2+gf**2)-E))
        logv=DLOG(4d0*mf*DSQRT(E**2+gf**2)/muC**2)
        if(nmax_used.eq.-1)then
-          z=1d0+aS*D1*mf/2d0/dcmplx(Em,Ep)
+          if(E.LT.0d0.AND.gf.eq.0d0)THEN
+             !we should reinterpret polygamma(0,1+x) as polygamma(0,-x) when x<-1/2
+             z=-aS*D1*mf/2d0/dcmplx(Em,Ep)
+             IF(DREAL(z).LE.0.5d0)THEN
+                z=1d0-z
+             ENDIF
+          ELSE
+             z=1d0+aS*D1*mf/2d0/dcmplx(Em,Ep)
+          ENDIF
           bwall=2d0/(aS*D1)*(gammaE+DREAL(polygamma(0,z)))
        endif
     ELSEIF(gf.eq.0d0.and.state_used.eq.1)then
@@ -303,7 +319,12 @@ CONTAINS
        Em=DSQRT(-mf*E)
        logv=DLOG(4d0*mf*DABS(E)/muC**2)
        if(nmax_used.eq.-1)then
-          z=1d0+aS*D1*mf/2d0/dcmplx(Em,Ep)
+          !we should reinterpret polygamma(0,1+x) as polygamma(0,-x) when x<-1/2
+          !z=1d0+aS*D1*mf/2d0/dcmplx(Em,Ep)
+          z=-aS*D1*mf/2d0/dcmplx(Em,Ep)
+          IF(DREAL(z).LE.0.5d0)THEN
+             z=1d0-z
+          ENDIF
           bwall=2d0/(aS*D1)*(gammaE+DREAL(polygamma(0,z)))
        endif
     endif
@@ -650,7 +671,12 @@ CONTAINS
        else
           gf2=gf
        endif
-       z=1d0+DC*aS/(2d0*SQRT(dcmplx(-E/mf,-gf2/mf)))
+       IF(DC.LT.0d0.AND.gf.EQ.0d0.AND.E.LT.0d0)THEN
+          !we should reinterpret polygamma(0,1+x) as polygamma(0,-x) when x<-1/2
+          z=-DC*aS/(2d0*SQRT(dcmplx(-E/mf,0d0)))
+       ELSE
+          z=1d0+DC*aS/(2d0*SQRT(dcmplx(-E/mf,-gf2/mf)))
+       ENDIF
        res=-mf**2/(4d0*pipi)*(SQRT(-dcmplx(E,gf2)/mf)&
             -DC*aS*(0.5d0*LOG(4d0*mf/muC**2*dcmplx(-E,-gf2))&
             -0.5d0+gammaE+polygamma(0,z)))
