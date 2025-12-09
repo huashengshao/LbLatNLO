@@ -317,9 +317,9 @@
       double precision aSmuR, aSmuC, muR, muC, DC, xs, mf
       double precision mu2oM2
       double precision E,pref,xx
-      double precision f_Coulomb_damping
-      external f_Coulomb_damping
-      double precision fdamp
+      double precision c_Coulomb_damping
+      external c_Coulomb_damping
+      double precision cdamp
       double precision Eomf_max,Eomf_min
 !     6 - 4*Sqrt[2]
       parameter(Eomf_max=0.343145750507619804793245103161d0)
@@ -341,14 +341,14 @@
       E=(dsqrt(xs)-2d0)*mf
       IF(E.LT.0d0)THEN
          !xx=DABS(DC)*aSmuC/(2d0*DSQRT(DABS(E)/mf))
-         !fdamp=f_Coulomb_damping(xx,50d0,0.5d0)
+         !cdamp=c_Coulomb_damping(xx,50d0,0.5d0)
          xx=mf/DABS(E)
-         fdamp=f_Coulomb_damping(xx,10d0,1d0/DABS(Eomf_min))
+         cdamp=c_Coulomb_damping(xx,10d0,1d0/DABS(Eomf_min))
       ELSE
          xx=mf/E
-         fdamp=f_Coulomb_damping(xx,10d0,1d0/Eomf_max)
+         cdamp=c_Coulomb_damping(xx,10d0,1d0/Eomf_max)
       ENDIF
-      IF(fdamp.LT.1d-6)RETURN
+      IF(cdamp.LT.1d-6)RETURN
       pref=aSmuR/pipi*(-DC)
       CALL Get_LPCoulRes_HelAmp(aSmuR,aSmuC,muC,DC,E,mf,ampLP)
       ampLP(1)=ampLP(1)/pref
@@ -359,14 +359,14 @@
       mu2oM2=muR**2/mf**2
       CALL Get_TwoLoop_HelAmp_LPCoulombApproxNOA(mu2oM2,xs,
      $     amp2LCoul)
-      amp2LLP(1)=amp2L(1)+fdamp*(ampLP(1)-amp1LCoul(1)-amp2LCoul(1))
-      amp2LLP(3)=amp2L(3)+fdamp*(ampLP(3)-amp1LCoul(3)-amp2LCoul(3))
+      amp2LLP(1)=amp2L(1)+cdamp*(ampLP(1)-amp1LCoul(1)-amp2LCoul(1))
+      amp2LLP(3)=amp2L(3)+cdamp*(ampLP(3)-amp1LCoul(3)-amp2LCoul(3))
       return
       end
 
-      function f_Coulomb_damping(x,kk,x0)
-      double precision f_Coulomb_damping
+      function c_Coulomb_damping(x,kk,x0)
+      double precision c_Coulomb_damping
       double precision x,kk,x0
-      f_Coulomb_damping=(1d0-DEXP(-20d0*x))/(1d0+DEXP(-kk*(x-x0)))
+      c_Coulomb_damping=(1d0-DEXP(-20d0*x))/(1d0+DEXP(-kk*(x-x0)))
       return
       end
