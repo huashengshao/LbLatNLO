@@ -85,6 +85,7 @@
       subroutine Get_TwoLoop_HelAmp_CoulombA(xt,amps)
       use UToneloopbasis
       use interpolation
+      use LbL_Global
       implicit none
       double precision xt
       ! only ihel=1 ++++
@@ -167,7 +168,8 @@
                ZA(i,1)=DREAL(ampstmp1(1)-amp2LCoul(1))
                ZA(i,2)=DREAL(ampstmp1(3)-amp2LCoul(3))
             ENDDO
-            OPEN(UNIT=iunit,FILE="Amp2LCoulA.grid",STATUS="NEW")
+            OPEN(UNIT=iunit,FILE=TRIM(grid_dir)//"Amp2LCoulA.grid",
+     $           STATUS="NEW")
             WRITE(iunit,*)NYA
             DO i=1,NYA
                WRITE(iunit,*)YA(i)
@@ -179,7 +181,7 @@
          ENDIF
          ! now, we make sure Amp2LCoulA.grid has been generated
          ! just read the grid
-         OPEN(UNIT=iunit,FILE="Amp2LCoulA.grid")
+         OPEN(UNIT=iunit,FILE=TRIM(grid_dir)//"Amp2LCoulA.grid")
          READ(iunit,*)NYA
          IF(ALLOCATED(YA))THEN
             IF(SIZE(YA).NE.NYA)THEN

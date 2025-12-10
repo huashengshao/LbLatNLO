@@ -1,7 +1,7 @@
 # beam configuration
 colpar 4              # colliding particles: 1=hadron-hadron UPC, 2=electron/positron-proton, 3=e-e+, 4=gamma-gamma (exclusive, i.e., do not break up initial hadrons)
-energy_beam1 2510d0   # beam 1 energy per nucleon/electron/positron/gamma (GeV)
-energy_beam2 2510d0   # beam 2 energy per nucleon/electron/positron/gamma (GeV)
+energy_beam1 170d0   # beam 1 energy per nucleon/electron/positron/gamma (GeV)
+energy_beam2 170d0   # beam 2 energy per nucleon/electron/positron/gamma (GeV)
 nuclearA_beam1  208     # A of nuclear of beam 1, 0: it is proton
 nuclearA_beam2  208     # A of nuclear of beam 2, 0: it is proton
 nuclearZ_beam1  82     # Z of nuclear of beam 1, 0: it is proton
@@ -21,24 +21,24 @@ UPC_photon_flux 1     # only colpar=1. 1: ChFF (2207.03012); 2: EDFF (2207.03012
 # -1: NLO QED |A(0,0)+A(0,1)|**2
 # -2: NLO QCD |A(0,0)+A(1,0)|**2
 # -3: NLO QED+QCD |A(0,0)+A(0,1)+A(1,0)|**2
-order -3
+order 0
 
 # Coulomb resummation
 # 0: no Coulomb resummation
 # 1: Leading power Coulomb resummation when order =/= 0 for massive fermion loops
-coulomb 1
+coulomb 0
 
 # masses (negative means we will not include such a contribution)
-emass  5.11d-4           # electron mass (pole mass)
-mumass  0.105d0          # muon mass (pole mass)
-taumass 1.77686d0      # tau mass (pole mass)
-umass 0.340d0            # up quark mass (pole mass)
-dmass 0.345d0            # down quark mass (pole mass)
-smass 0.458d0            # strange quark mass (pole mass)
-cmass 1.5d0            # charm quark mass (pole mass)
-bmass 4.75d0           # bottom quark mass (pole mass)
+emass  -1d0           # electron mass (pole mass)
+mumass  -1d0          # muon mass (pole mass)
+taumass -1d0      # tau mass (pole mass)
+umass -1d0            # up quark mass (pole mass)
+dmass -1d0            # down quark mass (pole mass)
+smass -1d0            # strange quark mass (pole mass)
+cmass -1d0            # charm quark mass (pole mass)
+bmass -1d0           # bottom quark mass (pole mass)
 tmass 173d0         # top quark mass (pole mass)
-wmass 80.49d0         # W mass
+wmass -1d0         # W mass
 
 # couplings
 alphaemm1     137.036d0    # alpha(0)**(-1)
@@ -64,13 +64,13 @@ rw_RScale_down 0.5d0       # lower bound for renormalisation scale variations
 rw_RScale_up   2.0d0       # upper bound for renormalisation scale variations
 
 # kinematic cuts in the lab frame
-minptp 2.5d0                 # minimum photon pt
+minptp  0d0                 # minimum photon pt
 maxptp -1.0d0              # maximum photon pt, negative no such cuts
 maxptpp -1.0d0             # maximum photon-pair pt, negative no such cuts
 maxaco  -1.0d0             # maximum acoplanarity, negative no such cuts
-maxyrapp 2.4d0             # maximum photon (pseudo-)rapidity
-minyrapp -2.4d0            # minimum photon (pseudo-)rapidity
-minmpp   5d0               # minimum invariant mass of photon-photon
+maxyrapp 5d0             # maximum photon (pseudo-)rapidity
+minyrapp -5d0            # minimum photon (pseudo-)rapidity
+minmpp    0d0               # minimum invariant mass of photon-photon
 maxmpp   -1d0              # maximum invariant mass of photon-photon, negative no such cuts
 
 
@@ -81,8 +81,8 @@ lhewgtup T                 # xwgtup=1 (F) or not (T) in unweighted lhe file
 nmc      500000            # number of Monte Carlo points or integrating points
 
 # histogram output
-topdrawer_output T         # topdrawer output file (T) or not (F)
-gnuplot_output   T         # gnuplot output file (T) or not (F)
+topdrawer_output F         # topdrawer output file (T) or not (F)
+gnuplot_output   F         # gnuplot output file (T) or not (F)
 root_output      F         # root output file (T) or not (F)
 hwu_output       T         # hwu output file (T) or not (F)
 
