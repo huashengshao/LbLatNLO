@@ -554,6 +554,8 @@ CONTAINS
        if(abs(order).GT.0)then
           if(hit_threshold)then
              xs=4d0
+             log10xs=DLOG10(xs)
+             y=-xt/(xs/2d0)
           endif
           if((i.lt.i_mass.and.wmass.GT.0d0).or.wmass.LT.0d0)then
              ! we do not have NLO for W boson
