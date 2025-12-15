@@ -94,6 +94,7 @@ CONTAINS
     double precision aew_cen,aew_up,aew_down
     double precision asmuC_cen,asmuC_up,asmuC_down
     double precision aewmuC_cen,aewmuC_up,aewmuC_down
+    logical hit_threshold
     !OPEN(UNIT=20333,FILE="alpha.dat")
     !DO i_mass=-10,10
     !   DO i_massless=0,90
@@ -471,10 +472,15 @@ CONTAINS
     ENDIF
 
     ! massive fermion and massive W boson loops
+    hit_threshold=.FALSE.
     DO i=1,i_mass
        MQ=mass(i)
        MQ2=MQ**2
        xs=shat/MQ2
+       IF(xs.EQ.4d0.and.xs_threshold.GT.0d0)THEN
+          xs=xs_threshold
+          hit_threshold=.TRUE.
+       ENDIF
        xt=that/MQ2
        xu=uhat/MQ2
        log10xs=DLOG10(xs)
@@ -546,9 +552,12 @@ CONTAINS
           ENDDO
        endif
        if(abs(order).GT.0)then
+          if(hit_threshold)then
+             xs=4d0
+          endif
           if((i.lt.i_mass.and.wmass.GT.0d0).or.wmass.LT.0d0)then
              ! we do not have NLO for W boson
-             
+  
              IF(coulomb.EQ.1)THEN
                 ! we need to do coulomb resummation
                 ! obtain the MUCQCD and MUCQED (Coulomb scales)
@@ -798,6 +807,7 @@ CONTAINS
              endif
           endif
        endif
+       hit_threshold=.FALSE.
     ENDDO
 
     ! helicity-summed amplitude square
