@@ -604,7 +604,8 @@ CONTAINS
              
              ! 1d8 and 1d-2 relate to INTEGER::NXMIN=-2,NXMAX=8 in eval_twoloop_massive_amplitudes
              if(improve_w_LE.EQ.0.OR.(improve_w_LE.EQ.-1&
-                  .and.xs.LE.1d8.and.xs.GE.1d-2))then
+                  .and.xs.LE.1d8.and.xs.GE.1d-2.and.&
+                  .not.(xs.LE.3.7d0.AND.(-2d0*xt/xs.LE.5d-4.or.-2d0*xu/xs.LE.5d-4))))then
                 if(grid_gen.eq.1.and.init_grid.eq.1)then
                    call eval_twoloop_massive_amplitudes(xs,xt,ampstmp,0)
                 else
@@ -630,7 +631,7 @@ CONTAINS
 
              if(improve_w_LE.EQ.-1)then
                 ! improve with the low-energy expansion results
-                if(xs.LE.1d-2)then
+                if(xs.LE.1d-2.or.(xs.LE.3.7d0.AND.(-2d0*xt/xs.LE.5d-4.or.-2d0*xu/xs.LE.5d-4)))then
                    DO j=1,5
                       !LElimit=massive_2LAmp_xs_LElimit(log10xs,y,j)
                       !if(LElimit.EQ.0)then
@@ -1715,6 +1716,11 @@ CONTAINS
        ENDDO
 
        DO nn=1,10
+          IF(xs.LT.4d0.AND.mod(nn,2).eq.0)THEN
+             ! below threshold, we have no imaginary part
+             ramps(nn)=0d0
+             CYCLE
+          ENDIF
           DO i=1,n_interp
              DO j=1,n_interp
                 ZA2(i,j)=ZA(k+i,l+j,nn)
