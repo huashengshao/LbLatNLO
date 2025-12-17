@@ -563,7 +563,7 @@ CONTAINS
              IF(coulomb.EQ.1)THEN
                 ! we need to do coulomb resummation
                 ! obtain the MUCQCD and MUCQED (Coulomb scales)
-                IF(abs(order).eq.2.or.abs(order).eq.3)then
+                IF((abs(order).eq.2.or.abs(order).eq.3).and.is_massive_quark(i))then
                    CALL Get_CoulRes_QCDScale(i,xs,1d0,MUR,MUCQCD_cen)
                    aSmuC_cen=ALPHAS(MUCQCD_cen)
                    if(reweight_scale)then
@@ -579,7 +579,8 @@ CONTAINS
                       aSmuC_down=aSmuC_cen
                    endif
                 ENDIF
-                IF(abs(order).eq.1.or.abs(order).eq.3)then
+                IF((abs(order).eq.1.or.abs(order).eq.3).and.&
+                     (is_massive_quark(i).or.is_massive_lepton(i)))then
                    CALL Get_CoulRes_QEDScale(i,xs,1d0,MUR,MUCQED_cen)
                    if(reweight_scale)then
                       CALL Get_CoulRes_QEDScale(i,xs,rw_RScale_up,MUR,MUCQED_up)
@@ -660,7 +661,8 @@ CONTAINS
              
              IF(coulomb.EQ.1)then
                 ! we need to do coulomb resummation
-                IF(abs(order).EQ.2.OR.abs(order).EQ.3)THEN
+                IF((abs(order).EQ.2.OR.abs(order).EQ.3)&
+                     .and.is_massive_quark(i))THEN
                    DC=-4d0/3d0
                    CALL Get_TwoLoop_HelAmp_LPCoulImproved(as_cen,aSmuC_cen,&
                         MUR,MUCQCD_cen,DC,xs,MQ,ampstmp,ampstmpQCDLP_cen)
@@ -671,7 +673,8 @@ CONTAINS
                            MUR_down,MUCQCD_down,DC,xs,MQ,ampstmp,ampstmpQCDLP_down)
                    ENDIF
                 ENDIF
-                IF(abs(order).EQ.1.OR.abs(order).EQ.3)THEN
+                IF((abs(order).EQ.1.OR.abs(order).EQ.3).and.&
+                     (is_massive_quark(i).or.is_massive_lepton(i)))THEN
                    DC=-massive_charge(i)**2
                    CALL Get_TwoLoop_HelAmp_LPCoulImproved(aew_cen,aewmuC_cen,&
                         MUR,MUCQED_cen,DC,xs,MQ,ampstmp,ampstmpQEDLP_cen)
@@ -694,7 +697,7 @@ CONTAINS
              !     ,ampstmp)
              if(abs(order).eq.2.and.prefac2LQCD(i).NE.0d0)then
                 ! only QCD
-                IF(coulomb.EQ.0)then
+                IF(coulomb.EQ.0.or..not.is_massive_quark(i))then
                    DO j=1,5
                       amptmp=ampstmp(j)
                       amp2L_up(j)=amp2L_up(j)+amptmp*prefac2LQCD(i)*as_up
@@ -714,7 +717,8 @@ CONTAINS
                 ENDIF
              elseif(abs(order).eq.1)then
                 ! only QED
-                IF(coulomb.eq.0)then
+                IF(coulomb.eq.0.or.&
+                     .not.(is_massive_quark(i).or.is_massive_lepton(i)))then
                    if(alpha_scheme.eq.2)then
                       DO j=1,5
                          amptmp=ampstmp(j)
@@ -758,7 +762,8 @@ CONTAINS
                 ENDIF
              else
                 ! QED+QCD
-                IF(coulomb.eq.0)then
+                IF(coulomb.eq.0.or.&
+                     .not.(is_massive_quark(i).or.is_massive_lepton(i)))then
                    if(alpha_scheme.eq.2)then
                       DO j=1,5
                          amptmp=ampstmp(j)
@@ -782,6 +787,12 @@ CONTAINS
                    endif
                 else
                    ! including Coulomb resummation
+                   IF(.not.is_massive_quark(i).and.is_massive_lepton(i))then
+                      ! it is a massive lepton
+                      ampstmpQCDLP_cen(1:5)=dcmplx(0d0,0d0)
+                      ampstmpQCDLP_up(1:5)=dcmplx(0d0,0d0)
+                      ampstmpQCDLP_down(1:5)=dcmplx(0d0,0d0)
+                   endif
                    IF(alpha_scheme.eq.2)then
                       DO j=1,5
                          amp2L(j)=amp2L(j)+ampstmpQCDLP_cen(j)*prefac2LQCD(i)*as_cen&
