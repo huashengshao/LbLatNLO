@@ -2206,7 +2206,7 @@ CONTAINS
        WRITE(*,*)"ERROR:: mass is zero in Get_CoulRes_QEDScale"
        STOP
     ENDIF
-    IF(.NOT.is_massive_quark(imass).and.is_massive_lepton(imass))THEN
+    IF(.NOT.is_massive_quark(imass).and..NOT.is_massive_lepton(imass))THEN
        WRITE(*,*)"ERROR: it is not a massive quark or lepton in Get_CoulRes_QEDScale"
        STOP
     ENDIF
