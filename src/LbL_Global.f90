@@ -140,4 +140,7 @@ MODULE LbL_Global
   ! if xs_threshold > 0d0, xs==4d0 will be assigned as xs_threshold
   ! otherwise, nothing happens
   REAL(KIND(1d0))::xs_threshold=3.99999999999d0
+  LOGICAL::display_helicity=.TRUE. ! whether to display helicity in LHE
+  REAL(KIND(1d0)),DIMENSION(5)::helicity_ratios
+  INTEGER,DIMENSION(4)::hel_configs
 END MODULE LbL_Global

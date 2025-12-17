@@ -1147,6 +1147,7 @@ CONTAINS
     REAL(KIND(1d0)),DIMENSION(1)::ranr
     REAL(KIND(1d0))::vtime,vspin,scale1,scalup,xwgtup,&
          px,py,pz,p0,pmass,umax,umax1
+    REAL(KIND(1d0))::rrr
     INTEGER::init=0,i,iij,i2,j2
     INTEGER::idup,idprup,istup,imothup1,imothup2,icol1,icol2
     LOGICAL::llwri
@@ -1184,6 +1185,93 @@ CONTAINS
           ENDIF
           call LbL_scale(scalup)
           WRITE(nunit3)4,IDPRUP,XWGTUP,SCALUP,AQEDUP,AQCDUP
+          IF(display_helicity.and.helicity_ratios(5).EQ.1d0)then
+             ! select helicity configuration
+             rrr=rand()
+             do i=1,5
+                IF(rrr.LE.helicity_ratios(i))EXIT
+             enddo
+             rrr=rand()
+             IF(i.EQ.1)THEN
+                ! ++++ or ----
+                IF(rrr.LE.0.5d0)THEN
+                   hel_configs(1:4)=1
+                ELSE
+                   hel_configs(1:4)=-1
+                ENDIF
+             ELSEIF(i.EQ.2)THEN
+                ! single minus or single plus
+                IF(rrr.LE.0.125d0)THEN
+                   hel_configs(1)=-1
+                   hel_configs(2:4)=1
+                ELSEIF(rrr.LE.0.25d0)THEN
+                   hel_configs(1)=1
+                   hel_configs(2)=-1
+                   hel_configs(3:4)=1
+                ELSEIF(rrr.LE.0.375d0)THEN
+                   hel_configs(1:2)=1
+                   hel_configs(3)=-1
+                   hel_configs(4)=1
+                ELSEIF(rrr.LE.0.5d0)THEN
+                   hel_configs(1:3)=1
+                   hel_configs(4)=-1
+                ELSEIF(rrr.LE.0.625d0)THEN
+                   hel_configs(1)=1
+                   hel_configs(2:4)=-1
+                ELSEIF(rrr.LE.0.75d0)THEN
+                   hel_configs(1)=-1
+                   hel_configs(2)=1
+                   hel_configs(3:4)=-1
+                ELSEIF(rrr.LE.0.875d0)THEN
+                   hel_configs(1:2)=-1
+                   hel_configs(3)=1
+                   hel_configs(4)=-1
+                ELSE
+                   hel_configs(1:3)=-1
+                   hel_configs(4)=1
+                ENDIF
+             ELSEIF(i.EQ.3)THEN
+                ! --++ or ++--
+                IF(rrr.LE.0.5d0)THEN
+                   hel_configs(1:2)=-1
+                   hel_configs(3:4)=1
+                ELSE
+                   hel_configs(1:2)=1
+                   hel_configs(3:4)=-1
+                ENDIF
+             ELSEIF(i.EQ.4)THEN
+                ! -+-+ or +-+-
+                IF(rrr.LE.0.5d0)THEN
+                   hel_configs(1)=-1
+                   hel_configs(2)=1
+                   hel_configs(3)=-1
+                   hel_configs(4)=1
+                ELSE
+                   hel_configs(1)=1
+                   hel_configs(2)=-1
+                   hel_configs(3)=1
+                   hel_configs(4)=-1
+                ENDIF
+             ELSE
+                ! -++- or +--+
+                IF(rrr.LE.0.5d0)THEN
+                   hel_configs(1)=-1
+                   hel_configs(2)=1
+                   hel_configs(3)=1
+                   hel_configs(4)=-1
+                ELSE
+                   hel_configs(1)=1
+                   hel_configs(2)=-1
+                   hel_configs(3)=-1
+                   hel_configs(4)=1
+                ENDIF
+             ENDIF
+             ! swap the helicities for initial particles
+             hel_configs(1)=-hel_configs(1)
+             hel_configs(2)=-hel_configs(2)
+          else
+             vspin=9
+          endif
           DO i=1,4
              idup=22
              IF(i.LE.2)THEN
@@ -1215,7 +1303,9 @@ CONTAINS
                 pmass=0d0
              endif
              vtime=0
-             vspin=9
+             IF(display_helicity.and.helicity_ratios(5).EQ.1d0)then
+                vspin=hel_configs(i)
+             endif
              WRITE(nunit3)idup,istup,imothup1,imothup2,icol1,icol2&
                   ,px,py,pz,p0,pmass,vtime,vspin
           ENDDO

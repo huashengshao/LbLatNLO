@@ -94,6 +94,7 @@ CONTAINS
     double precision aew_cen,aew_up,aew_down
     double precision asmuC_cen,asmuC_up,asmuC_down
     double precision aewmuC_cen,aewmuC_up,aewmuC_down
+    double precision helicity_sum
     logical hit_threshold
     !OPEN(UNIT=20333,FILE="alpha.dat")
     !DO i_mass=-10,10
@@ -830,11 +831,21 @@ CONTAINS
        camp2L(i)=DCONJG(amp2L(i))
        camp2L_up(i)=DCONJG(amp2L_up(i))
        camp2L_down(i)=DCONJG(amp2L_down(i))
+       helicity_ratios(i)=0d0
     enddo
     if(order.GE.0)then
        virt_wgts=amp1L(1)*camp1L(1)*2d0+amp1L(2)*camp1L(2)*8d0&
             +amp1L(3)*camp1L(3)*2d0+amp1L(4)*camp1L(4)*2d0&
             +amp1L(5)*camp1L(5)*2d0
+       IF(unwgt.and.display_helicity)THEN
+          do i=1,5
+             IF(i.eq.2)then
+                helicity_ratios(i)=8d0*amp1L(i)*camp1L(i)
+             else
+                helicity_ratios(i)=2d0*amp1L(i)*camp1L(i)
+             endif
+          enddo
+       endif
     endif
     if(order.GT.0)then
        ! NLO in amplitude square
@@ -849,6 +860,15 @@ CONTAINS
        virt_wgts=virt_wgts+2d0*DREAL(amp2L(1)*camp1L(1)*2d0&
             +amp2L(2)*camp1L(2)*8d0+amp2L(3)*camp1L(3)*2d0&
             +amp2L(4)*camp1L(4)*2d0+amp2L(5)*camp1L(5)*2d0)
+       IF(unwgt.and.display_helicity)THEN
+          do i=1,5
+             IF(i.eq.2)then
+                helicity_ratios(i)=helicity_ratios(i)+8d0*DREAL(amp2L(i)*camp1L(i)*2d0)
+             else
+                helicity_ratios(i)=helicity_ratios(i)+2d0*DREAL(amp2L(i)*camp1L(i)*2d0)
+             endif
+          enddo
+       endif
        if(reweight_scale.and.virt_wgts.ne.0d0)then
           wgtxsecmu(2)=virt_wgts_up/virt_wgts
           wgtxsecmu(3)=virt_wgts_down/virt_wgts
@@ -874,12 +894,41 @@ CONTAINS
        virt_wgts=amp2L(1)*camp2L(1)*2d0+amp2L(2)*camp2L(2)*8d0&
             +amp2L(3)*camp2L(3)*2d0+amp2L(4)*camp2L(4)*2d0&
             +amp2L(5)*camp2L(5)*2d0
+       IF(unwgt.and.display_helicity)THEN
+          do i=1,5
+             IF(i.eq.2)then
+                helicity_ratios(i)=8d0*amp2L(i)*camp2L(i)
+             else
+                helicity_ratios(i)=2d0*amp2L(i)*camp2L(i)
+             endif
+          enddo
+       endif
        if(reweight_scale.and.virt_wgts.ne.0d0)then
           wgtxsecmu(2)=virt_wgts_up/virt_wgts
           wgtxsecmu(3)=virt_wgts_down/virt_wgts
        endif
     endif
     virt_wgts=virt_wgts/DBLE(IDEN)
+    IF(unwgt.and.display_helicity)THEN
+       helicity_sum=0d0
+       do i=1,5
+          helicity_ratios(i)=dabs(helicity_ratios(i))
+          helicity_sum=helicity_sum+helicity_ratios(i)
+       enddo
+       IF(helicity_sum.GT.0d0)then
+          do i=1,5
+             helicity_ratios(i)=helicity_ratios(i)/helicity_sum
+             IF(i.GT.1)THEN
+                helicity_ratios(i)=helicity_ratios(i-1)+helicity_ratios(i)
+             ENDIF
+          enddo
+          IF(helicity_ratios(5).LE.1d0-1d-10)then
+             write(*,*)"ERROR: helicity_ratios(5) =!= 1"
+             stop
+          endif
+          helicity_ratios(5)=1d0
+       endif
+    ENDIF
     return
   end subroutine stwoloopmatrix_LbL
 
