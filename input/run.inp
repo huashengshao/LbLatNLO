@@ -1,7 +1,7 @@
 # beam configuration
 colpar 4              # colliding particles: 1=hadron-hadron UPC, 2=electron/positron-proton, 3=e-e+, 4=gamma-gamma (exclusive, i.e., do not break up initial hadrons)
-energy_beam1 165.975d0   # beam 1 energy per nucleon/electron/positron/gamma (GeV)
-energy_beam2 165.975d0   # beam 2 energy per nucleon/electron/positron/gamma (GeV)
+energy_beam1 170.5d0   # beam 1 energy per nucleon/electron/positron/gamma (GeV)
+energy_beam2 170.5d0   # beam 2 energy per nucleon/electron/positron/gamma (GeV)
 nuclearA_beam1  208     # A of nuclear of beam 1, 0: it is proton
 nuclearA_beam2  208     # A of nuclear of beam 2, 0: it is proton
 nuclearZ_beam1  82     # Z of nuclear of beam 1, 0: it is proton
@@ -26,7 +26,7 @@ order -2
 # Coulomb resummation
 # 0: no Coulomb resummation
 # 1: Leading power Coulomb resummation when order =/= 0 for massive fermion loops
-coulomb 0
+coulomb 1
 
 # masses (negative means we will not include such a contribution)
 emass  -1d0           # electron mass (pole mass)
