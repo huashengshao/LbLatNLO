@@ -1682,7 +1682,7 @@ CONTAINS
           iprint=iprint+1
           if(iprint.LE.5)then
              write(*,*)"WARNING: outside the range of the grid (xs,xt)=",xs,xt
-             write(*,*)"WARNING: set the 2-loop amplitudes to zero"
+             write(*,*)"WARNING: set two-loop amplitudes to zero"
              if(iprint.eq.5)then
                 write(*,*)"INFO: will suppress the further warning"
              endif
@@ -1698,7 +1698,7 @@ CONTAINS
           iprint=iprint+1
           if(iprint.LE.2)then
              write(*,*)"WARNING: hit the threshold (xs,xt)=",xs,xt
-             write(*,*)"WARNING: set the 2-loop amplitudes to zero"
+             write(*,*)"WARNING: set two-loop amplitudes to zero"
              if(iprint.eq.5)then
                 write(*,*)"INFO: will suppress the further warning"
              endif
