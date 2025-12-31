@@ -338,7 +338,7 @@
          STOP
       ENDIF
       amp2LLP(1:5)=amp2L(1:5)
-      IF(DC.eq.0d0)RETURN
+      IF(DC.eq.0d0.or.xs.eq.4d0)RETURN
       ! binding energy
       E=(dsqrt(xs)-2d0)*mf
       IF(E.LT.0d0)THEN
