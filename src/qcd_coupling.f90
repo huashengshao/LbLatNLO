@@ -706,7 +706,7 @@ CONTAINS
     ! Heavy Quark Mass Thresholds mc=1.4,mb=4.5,mt=180.0
     !REAL(KIND(1d0)),DIMENSION(3)::Q2THR=(/1.690d0,20.25d0,32400d0 /)
     REAL(KIND(1d0)),DIMENSION(6),PARAMETER::Q_THR_default=(/1d-10,1d-10,0.15d0,&
-         1.4d0,4.5d0,180d0 /)
+         1.5d0,4.75d0,172.56d0 /)
     REAL(KIND(1d0))::ALP,ALP0,LAM2,XLP,XL,XLM,Y,Y1
     REAL(KIND(1d0))::B1,B2,B3,B4,beta0LQ2
     REAL(KIND(1d0))::LQ2,LLQ2
