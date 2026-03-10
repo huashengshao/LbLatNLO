@@ -29,6 +29,7 @@ order -3
 coulomb 1
 
 # masses (negative means we will not include such a contribution)
+# in units of GeV
 emass  0.0d0           # electron mass (pole mass)
 mumass  0.0d0          # muon mass (pole mass)
 taumass 1.77686d0      # tau mass (pole mass)

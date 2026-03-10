@@ -4,8 +4,8 @@ MODULE plot_LbL
   IMPLICIT NONE
   INTEGER::max_weight=1
   INTEGER::nwgt_analysis
-  INTEGER::num_plots=20 ! num_plots=inum_plots*2
-  INTEGER::inum_plots=10
+  INTEGER::num_plots=33 ! num_plots=inum_plots*3
+  INTEGER::inum_plots=11
   INTEGER,PARAMETER::n_width=1,n_height=1
 CONTAINS
   SUBROUTINE initplot_LbL
@@ -86,7 +86,8 @@ CONTAINS
     INTEGER::i,j,kk,l
     REAL(KIND(1d0)),PARAMETER::PI=3.14159265358979312D0
     ! ATLAS means the cut in 2008.05355
-    character(len=5)::cc(2)=(/'     ','ATLAS'/)
+    ! CMS means the cut in 2412.15413
+    character(len=5)::cc(3)=(/'     ','ATLAS','CMS  '/)
     INCLUDE '../hbook/dbookf90.inc'
     INCLUDE '../hbook/histogram_common90.inc'
     top_yes=topdrawer_output
@@ -100,7 +101,7 @@ CONTAINS
             nwgt_analysis*num_plots*4 ! 4 is internal in dbook
        STOP
     ENDIF
-    DO i=1,2
+    DO i=1,3
        l=(i-1)*inum_plots
        CALL histogram_book(l+ 1,'total rate '//cc(i),&
             2,0d0,4d0,.FALSE.)
@@ -114,14 +115,16 @@ CONTAINS
             40,2.8d0,4d0,.TRUE.)
        CALL histogram_book(l+ 6,'Abs(y(aa)) '//cc(i),&
             100,0d0,5d0,.TRUE.)
-       CALL histogram_book(l+ 7,'pT(a) avg '//cc(i),&
+       CALL histogram_book(l+ 7,'y(aa) '//cc(i),&
+            30,-2.2d0,2.2d0,.TRUE.)
+       CALL histogram_book(l+ 8,'pT(a) avg '//cc(i),&
             100,0d0,50d0,.TRUE.)
-       CALL histogram_book(l+ 8,'Abs(cos(theta)) '//cc(i),&
+       CALL histogram_book(l+ 9,'Abs(cos(theta)) '//cc(i),&
             100,0d0,1d0,.TRUE.)
-       CALL histogram_book(l+ 9,'pT(aa) '//cc(i),&
-            100,0d0,10d0,.TRUE.)
-       CALL histogram_book(l+10,'acoplanarity '//cc(i),&
+       CALL histogram_book(l+10,'pT(aa) '//cc(i),&
             100,0d0,1d0,.TRUE.)
+       CALL histogram_book(l+11,'acoplanarity '//cc(i),&
+            100,0d0,0.1d0,.TRUE.)
     ENDDO
 
     CALL HISTOGRAM_BOOK_FINISH
@@ -183,13 +186,13 @@ CONTAINS
     IMPLICIT NONE
     REAL(KIND(1d0)),DIMENSION(:),INTENT(IN)::wgts
     REAL(KIND(1d0))::var,Q,www
-    REAL(KIND(1d0))::exp1,exp2,maa,yaa,etaa1,etaa2,pta1,pta2,pTavg
+    REAL(KIND(1d0))::exp1,exp2,maa,yaa,ayaa,etaa1,etaa2,pta1,pta2,pTavg
     REAL(KIND(1d0))::ya1,ya2,costh,ptaa,dphi
     INTEGER::i,m,l,kk,numFa,numIa
     REAL(KIND(1d0)),DIMENSION(2,0:3)::xpI_a,xpF_a
     REAL(KIND(1d0)),DIMENSION(0:3)::xpF_aa
     REAL(KIND(1d0)),PARAMETER::PI=3.14159265358979312D0
-    LOGICAL,DIMENSION(2)::pass_cuts
+    LOGICAL,DIMENSION(3)::pass_cuts
     IF(wgts(1).EQ.0d0)RETURN
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !
@@ -202,7 +205,7 @@ CONTAINS
     xpF_aa(0:3)=LbL_pmom(3,0:3)+LbL_pmom(4,0:3)
     maa=DSQRT(xpF_aa(0)**2-xpF_aa(1)**2-xpF_aa(2)**2-xpF_aa(3)**2)
     yaa=rapidity(xpF_aa)
-    yaa=DABS(yaa)
+    ayaa=DABS(yaa)
     pass_cuts(1)=.TRUE.
     pta1=DSQRT(xpF_a(1,1)**2+xpF_a(1,2)**2)
     pta2=DSQRT(xpF_a(2,1)**2+xpF_a(2,2)**2)
@@ -223,15 +226,19 @@ CONTAINS
     costh=DABS(costh)
     ! ATLAS cuts (arXiv:2008.05355)
     ! for this 2 -> 2 process
-    ! I do not impose pT(aa) cut and (1-|D phi(aa)|/pi)<0.01 cut
     pass_cuts(2)=pta1.GT.2.5d0.AND.pta2.GT.2.5d0.AND.DABS(etaa1).LT.2.37d0&
-         .AND.DABS(etaa2).LT.2.37d0.AND.maa.GT.5d0
+         .AND.DABS(etaa2).LT.2.37d0.AND.maa.GT.5d0.AND.pTaa.LT.1d0&
+         .AND.dphi.LT.0.01d0
+    ! CMS cuts (arXiv:2412.15413, table 1)
+    pass_cuts(3)=pta1.GT.2d0.AND.pta2.GT.2d0.AND.DABS(etaa1).LT.2.2d0&
+         .AND.DABS(etaa2).LT.2.2d0.AND.maa.GT.5d0.AND.pTaa.LT.1d0&
+         .AND.dphi.LT.0.01d0
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !
     ! START TO FILL HISTOGRAM
     !
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    DO i=1,2
+    DO i=1,3
        IF(.NOT.pass_cuts(i))CYCLE
        l=(i-1)*inum_plots
        CALL HISTOGRAM_fill(l+1,var,wgts)
@@ -241,11 +248,12 @@ CONTAINS
        CALL HISTOGRAM_fill(l+3,maa,wgts)
        CALL HISTOGRAM_fill(l+4,maa,wgts)
        CALL HISTOGRAM_fill(l+5,maa,wgts)
-       CALL HISTOGRAM_fill(l+6,yaa,wgts)
-       CALL HISTOGRAM_fill(l+7,pTavg,wgts)
-       CALL HISTOGRAM_fill(l+8,costh,wgts)
-       CALL HISTOGRAM_fill(l+9,pTaa,wgts)
-       CALL HISTOGRAM_fill(l+10,dphi,wgts)
+       CALL HISTOGRAM_fill(l+6,ayaa,wgts)
+       CALL HISTOGRAM_fill(l+7,yaa,wgts)
+       CALL HISTOGRAM_fill(l+8,pTavg,wgts)
+       CALL HISTOGRAM_fill(l+9,costh,wgts)
+       CALL HISTOGRAM_fill(l+10,pTaa,wgts)
+       CALL HISTOGRAM_fill(l+11,dphi,wgts)
     ENDDO
     IF(hwu_output)THEN
        call HwU_add_points

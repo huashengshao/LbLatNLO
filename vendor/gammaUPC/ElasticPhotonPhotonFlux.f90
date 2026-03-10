@@ -5534,6 +5534,7 @@ CONTAINS
     logQ2oQ02max=dlog(Q2max/Q02)
     logQ2oQ02min=dlog(Q2min/Q02)
 
+    
     if(Q2max_save(ibeam).ne.Q2max)then
        ! we need to generate the grid first
        Q2max_save(ibeam)=Q2max

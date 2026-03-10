@@ -498,6 +498,7 @@ CONTAINS
           jac0=jac0/(16d0*pipi*sq)
        endif
 
+
        init=1
     ENDIF
     nnntot=nnntot+1 
@@ -551,7 +552,10 @@ CONTAINS
           CALL Boostl(maa,PBOO,LbL_pmom_CF(i,0:3))
        ENDDO
     endif
-    IF(colpar.EQ.1.and.intrinsic_kt)then
+    IF(colpar.EQ.1.and.intrinsic_kt.and.&
+         xp1.LT.xpmax_kt.and.xp2.LT.xpmax_kt)then
+       ! xp1.LT.xpmax_kt.and.xp2.LT.xpmax_kt because the formula only applies
+       ! to small x region
        Q1=0d0
        Q2=0d0
        reshuffled=.FALSE.
@@ -929,7 +933,10 @@ CONTAINS
           CALL Boostl(maa,PBOO,LbL_pmom_CF(i,0:3))
        ENDDO
     endif
-    IF(colpar.EQ.1.and.intrinsic_kt)then
+    IF(colpar.EQ.1.and.intrinsic_kt.and.&
+         xp1.LT.xpmax_kt.AND.xp2.LT.xpmax_kt)then
+       ! xp1.LT.xpmax_kt.and.xp2.LT.xpmax_kt because the formula only applies
+       ! to small x region
        Q1=0d0
        Q2=0d0
        reshuffled=.FALSE.

@@ -91,7 +91,9 @@ MODULE LbL_Global
   REAL(KIND(1d0)),DIMENSION(4,0:3)::LbL_pmom_CF
   LOGICAL::intrinsic_kt=.FALSE.
   INTEGER::ion_Form=1 ! Form1: Q**2=kT**2+(mn*x)**2, Qmin**2=(mn*x)**2;
-                      ! Form2: Q**2=kT**2/(1-x)+(mn*x)**2/(1-x), Qmin**2=(mn*x)**2/(1-x) [more exact]
+  ! Form2: Q**2=kT**2/(1-x)+(mn*x)**2/(1-x), Qmin**2=(mn*x)**2/(1-x) [more exact]
+  ! kt smearing only applies when xp1.LT.xpmax_kt.and.xp2.LT.xpmax_kt
+  REAL(KIND(1d0)),PARAMETER::xpmax_kt=0.2d0
   INTEGER::ho_nscale=0 ! number of scales
   INTEGER::tot_nrwgt=0
   ! scale reweight stuff
