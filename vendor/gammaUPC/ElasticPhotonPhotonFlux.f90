@@ -276,7 +276,7 @@ CONTAINS
     ! NXSEG for x_gamma from 10**(-n-1) to 10**(-n)
     INTEGER,PARAMETER::NXSEG=8
     INTEGER::log10xmin,log10xmin_before,ilog10x
-    REAL(KIND(1d0))::XMIN=1D-8
+    REAL(KIND(1d0))::XMIN=1D-12
     SAVE XMIN
     REAL(KIND(1d0))::log10x1,kTmax
     REAL(KIND(1d0))::rescaling_bmax_save
@@ -634,7 +634,7 @@ CONTAINS
     ! NXSEG for x_gamma from 10**(-n-1) to 10**(-n) 
     INTEGER,PARAMETER::NXSEG=8
     INTEGER::log10xmin,log10xmin_before,ilog10x
-    REAL(KIND(1d0))::XMIN=1D-8
+    REAL(KIND(1d0))::XMIN=1D-12
     SAVE XMIN
     REAL(KIND(1d0))::log10x1
     REAL(KIND(1d0)),PARAMETER::mN=0.9315d0 ! average nucleaon mass in nuclei (GeV)
@@ -1369,7 +1369,7 @@ CONTAINS
     SAVE init
     INTEGER::MX_save=0
     SAVE MX_save
-    REAL(KIND(1d0))::xmin=1D-8
+    REAL(KIND(1d0))::xmin=1D-12
     SAVE xmin
     INTEGER::log10xmin,log10xmin_before
     REAL(KIND(1d0))::log10x
@@ -1548,7 +1548,7 @@ CONTAINS
     ! NXSEG for x_gamma from 10**(-n-1) to 10**(-n)
     INTEGER,PARAMETER::NXSEG=20
     INTEGER::log10xmin,log10xmin_before,ilog10x,i,j,k,l,n
-    REAL(KIND(1d0))::XMIN=1D-8
+    REAL(KIND(1d0))::XMIN=1D-12
     SAVE XMIN
     REAL(KIND(1d0))::log10x1
     REAL(KIND(1d0)),DIMENSION(2)::R_save,w_save,aa_save,gamma_save
@@ -1808,7 +1808,7 @@ CONTAINS
     LOGICAL,INTENT(IN),OPTIONAL::FORCEPNOHAD1 ! If true, it only evaluates with PNOHAD=1
     INTEGER::init=0
     SAVE init
-    REAL(KIND(1d0))::xmin=1D-8
+    REAL(KIND(1d0))::xmin=1D-12
     SAVE xmin
     INTEGER::log10xmin,log10xmin_before
     REAL(KIND(1d0))::log10x1,log10x2
@@ -2174,7 +2174,7 @@ CONTAINS
     LOGICAL,INTENT(IN),OPTIONAL::FORCEPNOHAD1 ! If true, it only evaluates with PNOHAD=1
     INTEGER::init=0
     SAVE init
-    REAL(KIND(1d0))::xmin=1D-8
+    REAL(KIND(1d0))::xmin=1D-12
     SAVE xmin
     INTEGER::log10xmin,log10xmin_before
     REAL(KIND(1d0))::log10x1,log10x2
@@ -2591,7 +2591,7 @@ CONTAINS
     LOGICAL,INTENT(IN),OPTIONAL::FORCEPNOHAD1
     INTEGER::init=0
     SAVE init
-    REAL(KIND(1d0))::xmin=1D-8
+    REAL(KIND(1d0))::xmin=1D-12
     SAVE xmin
     INTEGER::log10xmin,log10xmin_before
     REAL(KIND(1d0))::log10x1,log10x2
@@ -2972,7 +2972,7 @@ CONTAINS
     LOGICAL,INTENT(IN),OPTIONAL::FORCEPNOHAD1
     INTEGER::init=0
     SAVE init
-    REAL(KIND(1d0))::xmin=1D-8
+    REAL(KIND(1d0))::xmin=1D-12
     SAVE xmin
     INTEGER::log10xmin,log10xmin_before
     REAL(KIND(1d0))::log10x1,log10x2
@@ -3373,7 +3373,7 @@ CONTAINS
     LOGICAL,INTENT(IN),OPTIONAL::FORCEPNOHAD1
     INTEGER::init=0
     SAVE init
-    REAL(KIND(1d0))::xmin=1D-8
+    REAL(KIND(1d0))::xmin=1D-12
     SAVE xmin
     INTEGER::log10xmin,log10xmin_before
     REAL(KIND(1d0))::log10x1,log10x2
@@ -3842,7 +3842,7 @@ CONTAINS
     LOGICAL,INTENT(IN),OPTIONAL::FORCEPNOHAD1
     INTEGER::init=0
     SAVE init
-    REAL(KIND(1d0))::xmin=1D-8
+    REAL(KIND(1d0))::xmin=1D-12
     SAVE xmin
     INTEGER::log10xmin,log10xmin_before
     REAL(KIND(1d0))::log10x1,log10x2
@@ -4212,7 +4212,7 @@ CONTAINS
     LOGICAL,INTENT(IN),OPTIONAL::FORCEPNOHAD1
     INTEGER::init=0
     SAVE init
-    REAL(KIND(1d0))::xmin=1D-8
+    REAL(KIND(1d0))::xmin=1D-12
     SAVE xmin
     INTEGER::log10xmin,log10xmin_before
     REAL(KIND(1d0))::log10x1,log10x2
@@ -4619,7 +4619,7 @@ CONTAINS
     LOGICAL,INTENT(IN),OPTIONAL::FORCEPNOHAD1
     INTEGER::init=0
     SAVE init
-    REAL(KIND(1d0))::xmin=1D-8
+    REAL(KIND(1d0))::xmin=1D-12
     SAVE xmin
     INTEGER::log10xmin,log10xmin_before
     REAL(KIND(1d0))::log10x1,log10x2
@@ -5534,7 +5534,6 @@ CONTAINS
     logQ2oQ02max=dlog(Q2max/Q02)
     logQ2oQ02min=dlog(Q2min/Q02)
 
-    
     if(Q2max_save(ibeam).ne.Q2max)then
        ! we need to generate the grid first
        Q2max_save(ibeam)=Q2max
