@@ -556,7 +556,7 @@ CONTAINS
                       amp2L_down(j)=amp2L_down(j)+amptmp*prefac2LQED(i)
                    ENDDO
                 endif
-             else
+             elseif(abs(order).eq.3)then
                 ! QED+QCD
                 if(alpha_scheme.eq.2)then
                    DO j=1,5
@@ -941,7 +941,7 @@ CONTAINS
                    amptmp=ampstmp(j)
                    amp2L(j)=amp2L(j)+amptmp*prefac2LQED(i)
                 ENDDO
-             else
+             elseif(abs(iorder).eq.3)then
                 ! QED+QCD
                 DO j=1,5
                    amptmp=ampstmp(j)

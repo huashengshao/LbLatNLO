@@ -2,10 +2,10 @@
 colpar 1              # colliding particles: 1=hadron-hadron UPC, 2=electron/positron-proton, 3=e-e+, 4=gamma-gamma (exclusive, i.e., do not break up initial hadrons)
 energy_beam1 2510d0   # beam 1 energy per nucleon/electron/positron/gamma (GeV)
 energy_beam2 2510d0   # beam 2 energy per nucleon/electron/positron/gamma (GeV)
-nuclearA_beam1  208     # A of nuclear of beam 1, 0: it is proton
-nuclearA_beam2  208     # A of nuclear of beam 2, 0: it is proton
-nuclearZ_beam1  82     # Z of nuclear of beam 1, 0: it is proton
-nuclearZ_beam2  82     # Z of nuclear of beam 2, 0: it is proton
+nuclearA_beam1  0     # A of nuclear of beam 1, 0: it is proton
+nuclearA_beam2  0     # A of nuclear of beam 2, 0: it is proton
+nuclearZ_beam1  0     # Z of nuclear of beam 1, 0: it is proton
+nuclearZ_beam2  0     # Z of nuclear of beam 2, 0: it is proton
 UPC_photon_flux 1     # only colpar=1. 1: ChFF (2207.03012); 2: EDFF (2207.03012); 3: improved Weizsacker-Williams (only for proton beams)
 
 # order
@@ -21,7 +21,7 @@ UPC_photon_flux 1     # only colpar=1. 1: ChFF (2207.03012); 2: EDFF (2207.03012
 # -1: NLO QED |A(0,0)+A(0,1)|**2
 # -2: NLO QCD |A(0,0)+A(1,0)|**2
 # -3: NLO QED+QCD |A(0,0)+A(0,1)+A(1,0)|**2
-order -3
+order 2
 
 # Coulomb resummation
 # 0: no Coulomb resummation
@@ -44,7 +44,7 @@ wmass 80.3692d0        # W mass
 # couplings
 alphaemm1     137.036d0    # alpha(0)**(-1)
 alphasMZ      0.118d0      # alpha_s(MZ) for the QCD corrections
-alphas_nloop  2            # how many loops run of alpha_s 
+alphas_nloop  5            # how many loops run of alpha_s 
                            # in the MSbar scheme (maximal 5)
 Gfermi        1.1663787d-5 # Gfermi only alpha_scheme=1    
 alphaMZm1     128.94d0     # alpha(MZ)**(-1) with alpha_scheme=2
@@ -78,7 +78,7 @@ maxmpp   -1d0              # maximum invariant mass of photon-photon, negative n
 gener    0                 # integrator: 0 VEGAS; 1 Romberg
 unwgt    F                 # unweighting on/off (only gener=0)
 lhewgtup T                 # xwgtup=1 (F) or not (T) in unweighted lhe file
-nmc      1000000           # number of Monte Carlo points or integrating points
+nmc      10000000          # number of Monte Carlo points or integrating points
 
 # histogram output
 topdrawer_output F         # topdrawer output file (T) or not (F)

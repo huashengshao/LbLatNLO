@@ -761,7 +761,7 @@ CONTAINS
                       ENDDO
                    ENDIF
                 ENDIF
-             else
+             elseif(abs(order).eq.3)then
                 ! QED+QCD
                 IF(coulomb.eq.0.or.&
                      .not.(is_massive_quark(i).or.is_massive_lepton(i)))then
@@ -1230,7 +1230,7 @@ CONTAINS
                    amptmp=ampstmp(j)
                    amp2L(j)=amp2L(j)+amptmp*prefac2LQED(i)
                 ENDDO
-             else
+             elseif(abs(iorder).eq.3)then
                 ! QED+QCD
                 DO j=1,5
                    amptmp=ampstmp(j)
