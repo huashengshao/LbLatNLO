@@ -2162,3 +2162,366 @@
      -     +(8E0_16*(-4E0_16+xi))/(xixj+4E0_16*xk))/3E0_16
       return
       end
+
+      ! the following are for MSbar minus OS
+
+      ! two-loop helicity amplitude difference between MSbar mass and OS mass
+      ! a global factor -I*Ncf*Qf**4*alpha**2*CFf*aS/Pi for two-loop QCD
+      ! a global factor -I*Ncf*Qf**4*alpha**2*Qf**2*alpha/Pi for two-loop QED
+      subroutine Get_TwoLoop_HelAmp_Massive_diff_MSbarOS(xs,xt,xu,
+     $     logm2omu2,loopba,amp)
+      implicit none
+      ! we use the notation of 2 -> 2 instead 4 -> 0
+      ! 1: --++,++--
+      ! 2: -+++,+-++,++-+,+++-,+---,-+--,--+-,---+
+      ! 3: ++++,----
+      ! 4: +--+,-++-
+      ! 5: +-+-,-+-+
+      double precision xs,xt,xu
+      double precision logm2omu2
+      integer NDIM
+      parameter (NDIM=9)
+      ! these are one-loop MIs dividing by square roots
+      ! same as the input in OneLoop_HelAmp_Massive
+      double complex loopba(NDIM)
+      double complex amp(5)
+      double precision rat101_UT2L,rat102_UT2L,rat103_UT2L,rat104_UT2L
+      double precision rat105_UT2L,rat106_UT2L,rat107_UT2L,rat108_UT2L
+      double precision rat109_UT2L,rat110_UT2L      
+      external rat101_UT2L,rat102_UT2L,rat103_UT2L,rat104_UT2L
+      external rat105_UT2L,rat106_UT2L,rat107_UT2L,rat108_UT2L
+      external rat109_UT2L,rat110_UT2L
+      double precision pref_logmu
+      double complex f3stu,f3tus,f3ust
+      double complex f6stu,f6tus,f6ust
+      double complex f5stu,f5tus,f5ust
+      double precision ratss(36)
+      pref_logmu=3d0*logm2omu2-4d0
+      f3stu=loopba(2)           ! f2tsu=f2tus
+      f3tus=loopba(3)           ! f2uts=f2ust
+      f3ust=loopba(1)           ! f2sut=f2stu
+      f5stu=loopba(5)           ! f4tsu=f4tus
+      f5tus=loopba(6)           ! f4uts=f4ust
+      f5ust=loopba(4)           ! f4sut=f4stu
+      f6stu=loopba(7)
+      f6tus=loopba(9)
+      f6ust=loopba(8)
+      ratss(1)=rat101_UT2L(xs,xt,xu)
+      ratss(2)=rat101_UT2L(xt,xu,xs)
+      ratss(3)=rat101_UT2L(xu,xs,xt)
+      ratss(4)=rat102_UT2L(xs,xt,xu)
+      ratss(5)=rat102_UT2L(xt,xu,xs)
+      ratss(6)=rat102_UT2L(xu,xs,xt)
+      ratss(7)=rat103_UT2L(xs,xt,xu)
+      ratss(8)=rat103_UT2L(xt,xu,xs)
+      ratss(9)=rat103_UT2L(xu,xs,xt)
+      ratss(10)=rat104_UT2L(xs,xt,xu)
+      ratss(11)=rat104_UT2L(xt,xu,xs)
+      ratss(12)=rat104_UT2L(xu,xs,xt)
+      ratss(13)=rat105_UT2L(xs,xt,xu)
+      ratss(14)=rat105_UT2L(xt,xu,xs)
+      ratss(15)=rat105_UT2L(xu,xs,xt)
+      ratss(16)=rat106_UT2L(xs,xt,xu)
+      ratss(17)=rat106_UT2L(xt,xu,xs)
+      ratss(18)=rat106_UT2L(xu,xs,xt)
+      ratss(19)=rat107_UT2L(xs,xt,xu)
+      ratss(20)=rat107_UT2L(xt,xu,xs)
+      ratss(21)=rat107_UT2L(xu,xs,xt)
+      ratss(22)=rat108_UT2L(xs,xt,xu)
+      ratss(23)=rat108_UT2L(xt,xu,xs)
+      ratss(24)=rat108_UT2L(xu,xs,xt)
+      ratss(25)=rat109_UT2L(xs,xt,xu)
+      ratss(26)=rat109_UT2L(xt,xu,xs)
+      ratss(27)=rat109_UT2L(xu,xs,xt)
+      ratss(28)=rat110_UT2L(xs,xt,xu)
+      ratss(29)=rat110_UT2L(xt,xu,xs)
+      ratss(30)=rat110_UT2L(xu,xs,xt)
+      ratss(31)=rat108_UT2L(xs,xu,xt)
+      ratss(32)=rat110_UT2L(xs,xu,xt)
+      ratss(33)=rat108_UT2L(xu,xt,xs)
+      ratss(34)=rat110_UT2L(xu,xt,xs)
+      ratss(35)=rat108_UT2L(xt,xs,xu)
+      ratss(36)=rat110_UT2L(xt,xs,xu)
+      ! --++,++--
+      amp(1)=16d0*pref_logmu*(ratss(1)*f3stu+ratss(2)*f3tus
+     $     +ratss(3)*f3ust+ratss(4)*f6stu+ratss(5)*f6tus
+     $     +ratss(6)*f6ust)
+      ! -+++,+-++,++-+,+++-,+---,-+--,--+-,---+
+      amp(2)=8d0*pref_logmu*(ratss(7)*f3stu+ratss(8)*f3tus
+     $     +ratss(9)*f3ust+ratss(10)*f5stu+ratss(11)*f5tus
+     $     +ratss(12)*f5ust+ratss(13)*f6stu+ratss(14)*f6tus
+     $     +ratss(15)*f6ust)
+      ! ++++,----
+      amp(3)=8d0*pref_logmu*(ratss(16)*f3ust+ratss(19)*f6tus
+     $     +ratss(22)*f3stu+ratss(31)*f3tus+ratss(25)*(f5stu+f5tus)
+     $     +ratss(28)*f6stu+ratss(32)*f6ust)
+      ! +--+,-++-
+      ! s<->u from ihel=3
+      amp(4)=8d0*pref_logmu*(ratss(18)*f3tus+ratss(21)*f6stu
+     $     +ratss(33)*f3stu+ratss(24)*f3ust+ratss(27)*(f5stu+f5ust)
+     $     +ratss(34)*f6tus+ratss(30)*f6ust)
+      ! +-+-,-+-+                                                                              
+      ! s<->t from ihel=3
+      amp(5)=8d0*pref_logmu*(ratss(17)*f3stu+ratss(20)*f6ust
+     $     +ratss(35)*f3ust+ratss(23)*f3tus+ratss(26)*(f5ust+f5tus)
+     $     +ratss(36)*f6stu+ratss(29)*f6tus)
+      return
+      end
+
+      
+      double precision function rat101_UT2L(xi,xj,xk)
+      implicit none
+      double precision xi,xj,xk
+      rat101_UT2L=xj**2*(4d0+xj)/(xi*xj+4d0*xk)/(xj*xk+4d0*xi)
+      return
+      end
+
+      double precision function rat102_UT2L(xi,xj,xk)
+      implicit none
+      double precision xi,xj,xk
+      rat102_UT2L=-2d0*(1d0-xk/(xi*xj+4d0*xk))
+      return
+      end
+
+      double precision function rat103_UT2L(xi,xj,xk)
+      implicit none
+      double precision xi,xj,xk
+      rat103_UT2L=(4d0-xj)*(xi*xk*(4d0-xj)-2d0*xj**2)
+     $     /(xi*xj+4d0*xk)/(xj*xk+4d0*xi)
+      return
+      end
+
+      double precision function rat104_UT2L(xi,xj,xk)
+      implicit none
+      double precision xi,xj,xk
+      rat104_UT2L=1d0/xk-xk/(xi*xj)
+      return
+      end
+
+      double precision function rat105_UT2L(xi,xj,xk)
+      implicit none
+      double precision xi,xj,xk
+      rat105_UT2L=2d0+xi*xj/xk+4d0*xk/(xi*xj+4d0*xk)
+      rat105_UT2L=-rat105_UT2L
+      return
+      end
+
+      double precision function rat106_UT2L(xi,xj,xk)
+      implicit none
+      double precision xi,xj,xk
+      rat106_UT2L=xi**2*(2d0-xi)*(4d0+xi)/(xi*xj+4d0*xk)/(xi*xk+4d0*xj)
+      return
+      end
+
+      double precision function rat107_UT2L(xi,xj,xk)
+      implicit none
+      double precision xi,xj,xk
+      rat107_UT2L=2d0+xj*xk/xi-xi*(2d0+xi)/(xj*xk+4d0*xi)
+      rat107_UT2L=-2d0*rat107_UT2L
+      return
+      end
+
+      double precision function rat108_UT2L(xi,xj,xk)
+      implicit none
+      double precision xi,xj,xk
+      rat108_UT2L=(4d0-xj)*(xi**2*(2d0+xj)+2d0*xk**2)
+     $     /(xi*xj+4d0*xk)/(xj*xk+4d0*xi)
+      return
+      end
+
+      double precision function rat109_UT2L(xi,xj,xk)
+      implicit none
+      double precision xi,xj,xk
+      rat109_UT2L=2d0/xi
+      return
+      end
+
+      double precision function rat110_UT2L(xi,xj,xk)
+      implicit none
+      double precision xi,xj,xk
+      rat110_UT2L=(xi**2*(xj-2d0)-6d0*(xi*xj+2d0*xk))/(xi*xj+4d0*xk)
+      return
+      end
+
+      ! two-loop helicity amplitude difference between MSbar mass and OS mass
+      ! a global factor -I*Ncf*Qf**4*alpha**2*CFf*aS/Pi for two-loop QCD
+      ! a global factor -I*Ncf*Qf**4*alpha**2*Qf**2*alpha/Pi for two-loop QED
+      subroutine Get_TwoLoop_HelAmp_Massive_diff_MSbarOS_QP(xs,xt,xu,
+     $     logm2omu2,loopba,amp)
+      implicit none
+      ! we use the notation of 2 -> 2 instead 4 -> 0
+      ! 1: --++,++--
+      ! 2: -+++,+-++,++-+,+++-,+---,-+--,--+-,---+
+      ! 3: ++++,----
+      ! 4: +--+,-++-
+      ! 5: +-+-,-+-+
+      real*16 xs,xt,xu
+      real*16 logm2omu2
+      integer NDIM
+      parameter (NDIM=9)
+      ! these are one-loop MIs dividing by square roots
+      ! same as the input in OneLoop_HelAmp_Massive (but QP version)
+      complex*32 loopba(NDIM)
+      complex*32 amp(5)
+      real*16 rat101_UT2L_QP,rat102_UT2L_QP,rat103_UT2L_QP
+      real*16 rat104_UT2L_QP,rat105_UT2L_QP,rat106_UT2L_QP
+      real*16 rat107_UT2L_QP,rat108_UT2L_QP,rat109_UT2L_QP
+      real*16 rat110_UT2L_QP      
+      external rat101_UT2L_QP,rat102_UT2L_QP,rat103_UT2L_QP
+      external rat104_UT2L_QP,rat105_UT2L_QP,rat106_UT2L_QP
+      external rat107_UT2L_QP,rat108_UT2L_QP,rat109_UT2L_QP
+      external rat110_UT2L_QP
+      real*16 pref_logmu
+      complex*32 f3stu,f3tus,f3ust
+      complex*32 f6stu,f6tus,f6ust
+      complex*32 f5stu,f5tus,f5ust
+      real*16 ratss(36)
+      pref_logmu=3E0_16*logm2omu2-4E0_16
+      f3stu=loopba(2)           ! f2tsu=f2tus
+      f3tus=loopba(3)           ! f2uts=f2ust
+      f3ust=loopba(1)           ! f2sut=f2stu
+      f5stu=loopba(5)           ! f4tsu=f4tus
+      f5tus=loopba(6)           ! f4uts=f4ust
+      f5ust=loopba(4)           ! f4sut=f4stu
+      f6stu=loopba(7)
+      f6tus=loopba(9)
+      f6ust=loopba(8)
+      ratss(1)=rat101_UT2L_QP(xs,xt,xu)
+      ratss(2)=rat101_UT2L_QP(xt,xu,xs)
+      ratss(3)=rat101_UT2L_QP(xu,xs,xt)
+      ratss(4)=rat102_UT2L_QP(xs,xt,xu)
+      ratss(5)=rat102_UT2L_QP(xt,xu,xs)
+      ratss(6)=rat102_UT2L_QP(xu,xs,xt)
+      ratss(7)=rat103_UT2L_QP(xs,xt,xu)
+      ratss(8)=rat103_UT2L_QP(xt,xu,xs)
+      ratss(9)=rat103_UT2L_QP(xu,xs,xt)
+      ratss(10)=rat104_UT2L_QP(xs,xt,xu)
+      ratss(11)=rat104_UT2L_QP(xt,xu,xs)
+      ratss(12)=rat104_UT2L_QP(xu,xs,xt)
+      ratss(13)=rat105_UT2L_QP(xs,xt,xu)
+      ratss(14)=rat105_UT2L_QP(xt,xu,xs)
+      ratss(15)=rat105_UT2L_QP(xu,xs,xt)
+      ratss(16)=rat106_UT2L_QP(xs,xt,xu)
+      ratss(17)=rat106_UT2L_QP(xt,xu,xs)
+      ratss(18)=rat106_UT2L_QP(xu,xs,xt)
+      ratss(19)=rat107_UT2L_QP(xs,xt,xu)
+      ratss(20)=rat107_UT2L_QP(xt,xu,xs)
+      ratss(21)=rat107_UT2L_QP(xu,xs,xt)
+      ratss(22)=rat108_UT2L_QP(xs,xt,xu)
+      ratss(23)=rat108_UT2L_QP(xt,xu,xs)
+      ratss(24)=rat108_UT2L_QP(xu,xs,xt)
+      ratss(25)=rat109_UT2L_QP(xs,xt,xu)
+      ratss(26)=rat109_UT2L_QP(xt,xu,xs)
+      ratss(27)=rat109_UT2L_QP(xu,xs,xt)
+      ratss(28)=rat110_UT2L_QP(xs,xt,xu)
+      ratss(29)=rat110_UT2L_QP(xt,xu,xs)
+      ratss(30)=rat110_UT2L_QP(xu,xs,xt)
+      ratss(31)=rat108_UT2L_QP(xs,xu,xt)
+      ratss(32)=rat110_UT2L_QP(xs,xu,xt)
+      ratss(33)=rat108_UT2L_QP(xu,xt,xs)
+      ratss(34)=rat110_UT2L_QP(xu,xt,xs)
+      ratss(35)=rat108_UT2L_QP(xt,xs,xu)
+      ratss(36)=rat110_UT2L_QP(xt,xs,xu)
+      ! --++,++--
+      amp(1)=16E0_16*pref_logmu*(ratss(1)*f3stu+ratss(2)*f3tus
+     $     +ratss(3)*f3ust+ratss(4)*f6stu+ratss(5)*f6tus
+     $     +ratss(6)*f6ust)
+      ! -+++,+-++,++-+,+++-,+---,-+--,--+-,---+
+      amp(2)=8E0_16*pref_logmu*(ratss(7)*f3stu+ratss(8)*f3tus
+     $     +ratss(9)*f3ust+ratss(10)*f5stu+ratss(11)*f5tus
+     $     +ratss(12)*f5ust+ratss(13)*f6stu+ratss(14)*f6tus
+     $     +ratss(15)*f6ust)
+      ! ++++,----
+      amp(3)=8E0_16*pref_logmu*(ratss(16)*f3ust+ratss(19)*f6tus
+     $     +ratss(22)*f3stu+ratss(31)*f3tus+ratss(25)*(f5stu+f5tus)
+     $     +ratss(28)*f6stu+ratss(32)*f6ust)
+      ! +--+,-++-
+      ! s<->u from ihel=3
+      amp(4)=8E0_16*pref_logmu*(ratss(18)*f3tus+ratss(21)*f6stu
+     $     +ratss(33)*f3stu+ratss(24)*f3ust+ratss(27)*(f5stu+f5ust)
+     $     +ratss(34)*f6tus+ratss(30)*f6ust)
+      ! +-+-,-+-+                                                                              
+      ! s<->t from ihel=3
+      amp(5)=8E0_16*pref_logmu*(ratss(17)*f3stu+ratss(20)*f6ust
+     $     +ratss(35)*f3ust+ratss(23)*f3tus+ratss(26)*(f5ust+f5tus)
+     $     +ratss(36)*f6stu+ratss(29)*f6tus)
+      return
+      end
+
+      real*16 function rat101_UT2L_QP(xi,xj,xk)
+      implicit none
+      real*16 xi,xj,xk
+      rat101_UT2L_QP=xj**2*(4E0_16+xj)/(xi*xj+4E0_16*xk)
+     $     /(xj*xk+4E0_16*xi)
+      return
+      end
+
+      real*16 function rat102_UT2L_QP(xi,xj,xk)
+      implicit none
+      real*16 xi,xj,xk
+      rat102_UT2L_QP=-2E0_16*(1E0_16-xk/(xi*xj+4E0_16*xk))
+      return
+      end
+
+      real*16 function rat103_UT2L_QP(xi,xj,xk)
+      implicit none
+      real*16 xi,xj,xk
+      rat103_UT2L_QP=(4E0_16-xj)*(xi*xk*(4E0_16-xj)-2E0_16*xj**2)
+     $     /(xi*xj+4E0_16*xk)/(xj*xk+4E0_16*xi)
+      return
+      end
+
+      real*16 function rat104_UT2L_QP(xi,xj,xk)
+      implicit none
+      real*16 xi,xj,xk
+      rat104_UT2L_QP=1E0_16/xk-xk/(xi*xj)
+      return
+      end
+
+      real*16 function rat105_UT2L_QP(xi,xj,xk)
+      implicit none
+      real*16 xi,xj,xk
+      rat105_UT2L_QP=2E0_16+xi*xj/xk+4E0_16*xk/(xi*xj+4E0_16*xk)
+      rat105_UT2L_QP=-rat105_UT2L_QP
+      return
+      end
+
+      real*16 function rat106_UT2L_QP(xi,xj,xk)
+      implicit none
+      real*16 xi,xj,xk
+      rat106_UT2L_QP=xi**2*(2E0_16-xi)*(4E0_16+xi)
+     $     /(xi*xj+4E0_16*xk)/(xi*xk+4E0_16*xj)
+      return
+      end
+
+      real*16 function rat107_UT2L_QP(xi,xj,xk)
+      implicit none
+      real*16 xi,xj,xk
+      rat107_UT2L_QP=2E0_16+xj*xk/xi-xi*(2E0_16+xi)/(xj*xk+4E0_16*xi)
+      rat107_UT2L_QP=-2E0_16*rat107_UT2L_QP
+      return
+      end
+
+      real*16 function rat108_UT2L_QP(xi,xj,xk)
+      implicit none
+      real*16 xi,xj,xk
+      rat108_UT2L_QP=(4E0_16-xj)*(xi**2*(2E0_16+xj)+2E0_16*xk**2)
+     $     /(xi*xj+4E0_16*xk)/(xj*xk+4E0_16*xi)
+      return
+      end
+
+      real*16 function rat109_UT2L_QP(xi,xj,xk)
+      implicit none
+      real*16 xi,xj,xk
+      rat109_UT2L_QP=2E0_16/xi
+      return
+      end
+
+      real*16 function rat110_UT2L_QP(xi,xj,xk)
+      implicit none
+      real*16 xi,xj,xk
+      rat110_UT2L_QP=(xi**2*(xj-2E0_16)-6E0_16*(xi*xj+2E0_16*xk))
+     $     /(xi*xj+4E0_16*xk)
+      return
+      end
+
