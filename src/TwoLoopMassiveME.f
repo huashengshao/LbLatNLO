@@ -2204,8 +2204,8 @@
       f5tus=loopba(6)           ! f4uts=f4ust
       f5ust=loopba(4)           ! f4sut=f4stu
       f6stu=loopba(7)
-      f6tus=loopba(9)
-      f6ust=loopba(8)
+      f6tus=loopba(8)
+      f6ust=loopba(9)
       ratss(1)=rat101_UT2L(xs,xt,xu)
       ratss(2)=rat101_UT2L(xt,xu,xs)
       ratss(3)=rat101_UT2L(xu,xs,xt)
@@ -2260,7 +2260,7 @@
       amp(4)=8d0*pref_logmu*(ratss(18)*f3tus+ratss(21)*f6stu
      $     +ratss(33)*f3stu+ratss(24)*f3ust+ratss(27)*(f5stu+f5ust)
      $     +ratss(34)*f6tus+ratss(30)*f6ust)
-      ! +-+-,-+-+                                                                              
+      ! +-+-,-+-+
       ! s<->t from ihel=3
       amp(5)=8d0*pref_logmu*(ratss(17)*f3stu+ratss(20)*f6ust
      $     +ratss(35)*f3ust+ratss(23)*f3tus+ratss(26)*(f5ust+f5tus)
@@ -2384,8 +2384,8 @@
       f5tus=loopba(6)           ! f4uts=f4ust
       f5ust=loopba(4)           ! f4sut=f4stu
       f6stu=loopba(7)
-      f6tus=loopba(9)
-      f6ust=loopba(8)
+      f6tus=loopba(8)
+      f6ust=loopba(9)
       ratss(1)=rat101_UT2L_QP(xs,xt,xu)
       ratss(2)=rat101_UT2L_QP(xt,xu,xs)
       ratss(3)=rat101_UT2L_QP(xu,xs,xt)
@@ -2440,7 +2440,7 @@
       amp(4)=8E0_16*pref_logmu*(ratss(18)*f3tus+ratss(21)*f6stu
      $     +ratss(33)*f3stu+ratss(24)*f3ust+ratss(27)*(f5stu+f5ust)
      $     +ratss(34)*f6tus+ratss(30)*f6ust)
-      ! +-+-,-+-+                                                                              
+      ! +-+-,-+-+
       ! s<->t from ihel=3
       amp(5)=8E0_16*pref_logmu*(ratss(17)*f3stu+ratss(20)*f6ust
      $     +ratss(35)*f3ust+ratss(23)*f3tus+ratss(26)*(f5ust+f5tus)
