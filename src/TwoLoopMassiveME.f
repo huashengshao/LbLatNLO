@@ -2168,7 +2168,7 @@
       ! two-loop helicity amplitude difference between MSbar mass and OS mass
       ! a global factor -I*Ncf*Qf**4*alpha**2*CFf*aS/Pi for two-loop QCD
       ! a global factor -I*Ncf*Qf**4*alpha**2*Qf**2*alpha/Pi for two-loop QED
-      subroutine Get_TwoLoop_HelAmp_Massive_diff_MSbarOS(xs,xt,xu,
+      subroutine TwoLoop_HelAmp_Massive_MSbarOS(xs,xt,xu,
      $     logm2omu2,loopba,amp)
       implicit none
       ! we use the notation of 2 -> 2 instead 4 -> 0
@@ -2346,7 +2346,7 @@
       ! two-loop helicity amplitude difference between MSbar mass and OS mass
       ! a global factor -I*Ncf*Qf**4*alpha**2*CFf*aS/Pi for two-loop QCD
       ! a global factor -I*Ncf*Qf**4*alpha**2*Qf**2*alpha/Pi for two-loop QED
-      subroutine Get_TwoLoop_HelAmp_Massive_diff_MSbarOS_QP(xs,xt,xu,
+      subroutine TwoLoop_HelAmp_Massive_MSbarOS_QP(xs,xt,xu,
      $     logm2omu2,loopba,amp)
       implicit none
       ! we use the notation of 2 -> 2 instead 4 -> 0
