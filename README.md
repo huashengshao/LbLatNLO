@@ -56,5 +56,5 @@ If you use the default `input/run.inp` and run the code, it will calculate the N
 
 ```
 sigma (pb)                   sd (pb)
-   XXX   YYY
+   150186.97498353379        86.933366046032788
 ```

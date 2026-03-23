@@ -71,14 +71,14 @@ maxptpp -1.0d0             # maximum photon-pair pt, negative no such cuts
 maxaco  -1.0d0             # maximum acoplanarity, negative no such cuts
 maxyrapp 5d0             # maximum photon (pseudo-)rapidity
 minyrapp -5d0            # minimum photon (pseudo-)rapidity
-minmpp   3d0               # minimum invariant mass of photon-photon
+minmpp   5d0               # minimum invariant mass of photon-photon
 maxmpp   -1d0              # maximum invariant mass of photon-photon, negative no such cuts
 
 # event generation setup
 gener    0                 # integrator: 0 VEGAS; 1 Romberg
 unwgt    T                 # unweighting on/off (only gener=0)
 lhewgtup T                 # xwgtup=1 (F) or not (T) in unweighted lhe file
-nmc      4000000           # number of Monte Carlo points or integrating points
+nmc      1000000           # number of Monte Carlo points or integrating points
 
 # histogram output
 topdrawer_output F         # topdrawer output file (T) or not (F)
