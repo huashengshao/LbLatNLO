@@ -1,5 +1,11 @@
 # Environment variables
 
+# Set CXX unless it's defined by an environment variable
+#ifeq ($(origin FC),default)
+#  # CXX=gcc
+#  include ../../input/cxx_compiler
+#endif
+
 ifeq ($(origin FFLAGS),undefined)
   FFLAGS= -O -w -fbounds-check -fPIC
   #FFLAGS+= -g -fbounds-check -ffpe-trap=invalid,zero,overflow,underflow,denormal -Wall

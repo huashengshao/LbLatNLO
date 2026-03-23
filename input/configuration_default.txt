@@ -10,7 +10,7 @@
 #! Prefered Fortran Compiler
 #! If None: try to find gfortran or ifort or g77 or f77 or lahey95 on the system
 #!
-# fortran_compiler =
+# fortran_compiler = None
 
 #! fastgpl (double precision) installation path
 #!  Path to the directory containing lib and include

@@ -6,6 +6,12 @@ ifeq ($(origin FFLAGS),undefined)
 endif
 FFLAGS+= -ffixed-line-length-132 -std=legacy
 
+# Set CXX unless it's defined by an environment variable
+#ifeq ($(origin CXX),default)
+#  # CXX=gcc
+#  include ../../input/cpp_compiler
+#endif
+
 CXX=gcc
 
 # Set FC unless it's defined by an environment variable

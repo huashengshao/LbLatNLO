@@ -16,7 +16,7 @@ mkdir -p bin lib obj mod tmp output
 cd ./input
 mkdir -p paths
 cd ../
-# determine the fortran compiler
+# determine the Fortran compiler
 FC=""
 cat ./input/configuration.txt | while read tmpline
 do

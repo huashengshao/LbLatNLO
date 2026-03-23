@@ -1,11 +1,11 @@
 # beam configuration
-colpar 3              # colliding particles: 1=hadron-hadron UPC, 2=electron/positron-proton, 3=e-e+, 4=gamma-gamma (exclusive, i.e., do not break up initial hadrons)
-energy_beam1 500   # beam 1 energy per nucleon/electron/positron/gamma (GeV)
-energy_beam2 500   # beam 2 energy per nucleon/electron/positron/gamma (GeV)
-nuclearA_beam1  0     # A of nuclear of beam 1, 0: it is proton
-nuclearA_beam2  0     # A of nuclear of beam 2, 0: it is proton
-nuclearZ_beam1  0     # Z of nuclear of beam 1, 0: it is proton
-nuclearZ_beam2  0     # Z of nuclear of beam 2, 0: it is proton
+colpar 1              # colliding particles: 1=hadron-hadron UPC, 2=electron/positron-proton, 3=e-e+, 4=gamma-gamma (exclusive, i.e., do not break up initial hadrons)
+energy_beam1 2510   # beam 1 energy per nucleon/electron/positron/gamma (GeV)
+energy_beam2 2510   # beam 2 energy per nucleon/electron/positron/gamma (GeV)
+nuclearA_beam1  208     # A of nuclear of beam 1, 0: it is proton
+nuclearA_beam2  208     # A of nuclear of beam 2, 0: it is proton
+nuclearZ_beam1  82     # Z of nuclear of beam 1, 0: it is proton
+nuclearZ_beam2  82     # Z of nuclear of beam 2, 0: it is proton
 UPC_photon_flux 1     # only colpar=1. 1: ChFF (2207.03012); 2: EDFF (2207.03012); 3: improved Weizsacker-Williams (only for proton beams)
 
 # order
@@ -65,18 +65,18 @@ rw_RScale_down 0.5d0       # lower bound for renormalisation scale variations
 rw_RScale_up   2.0d0       # upper bound for renormalisation scale variations
 
 # kinematic cuts in the lab frame
-minptp 2.0d0               # minimum photon pt
+minptp  2.0d0               # minimum photon pt
 maxptp -1.0d0              # maximum photon pt, negative no such cuts
 maxptpp -1.0d0             # maximum photon-pair pt, negative no such cuts
 maxaco  -1.0d0             # maximum acoplanarity, negative no such cuts
-maxyrapp 2d0             # maximum photon (pseudo-)rapidity
-minyrapp -2d0            # minimum photon (pseudo-)rapidity
-minmpp   5d0               # minimum invariant mass of photon-photon
+maxyrapp 5d0             # maximum photon (pseudo-)rapidity
+minyrapp -5d0            # minimum photon (pseudo-)rapidity
+minmpp   3d0               # minimum invariant mass of photon-photon
 maxmpp   -1d0              # maximum invariant mass of photon-photon, negative no such cuts
 
 # event generation setup
 gener    0                 # integrator: 0 VEGAS; 1 Romberg
-unwgt    F                 # unweighting on/off (only gener=0)
+unwgt    T                 # unweighting on/off (only gener=0)
 lhewgtup T                 # xwgtup=1 (F) or not (T) in unweighted lhe file
 nmc      4000000           # number of Monte Carlo points or integrating points
 
@@ -88,7 +88,7 @@ hwu_output       T         # hwu output file (T) or not (F)
 
 # gamma-UPC (2207.03012) options
 use_MC_Glauber F            # whether or not to use MC-Glauber TAA for the survival probability when colpar=1 and UPC_photon_flux=1 or 2.
-intrinsic_kt  F             # whether to include the intrinsic kT due to the non-zero virtuality of the initial photon in UPCs
+intrinsic_kt  T             # whether to include the intrinsic kT due to the non-zero virtuality of the initial photon in UPCs
 # q2max in electron or proton iWW photon flux
 q2max 1d0   # the maximal q2 cut for iWW photon flux [in units of GeV^2]
 
