@@ -12,7 +12,7 @@ Light-by-light scattering at next-to-leading order in QCD and QED
 The code will calculate the (differential) cross section and generate unweighted events of light-by-light scattering process at high-energy colliders.
 
 In addition to this repository, further documentation is available in
-[arXiv:25XX.YYYYY](https://arxiv.org/abs/25XX.YYYYY). Please cite this
+[arXiv:26XX.YYYYY](https://arxiv.org/abs/26XX.YYYYY). Please cite this
 article, [arXiv:2312.16966](https://arxiv.org/abs/2312.16966) and [arXiv:2312.16956](https://arxiv.org/abs/2312.16956), as well as relevant references therein, if you use `LbLatNLO`.
 
 
@@ -52,7 +52,7 @@ cd LbLatNLO
 
 ## Example
 
-If you use the default `input/run.inp` and run the code, it will calculate the NLO QCD and NLO QED cross section for light-by-light scattering in ultraperipheral proton-proton collisions (with the ChFF photon flux from [gamma-UPC](https://arxiv.org/abs/2207.03012)) at 14 TeV. The cross section is
+If you use the default `input/run.inp` and run the code, it will calculate the NLO+LP$^\prime$ QCD+QED cross section for light-by-light scattering in ultraperipheral lead-lead collisions (with the ChFF photon flux from [gamma-UPC](https://arxiv.org/abs/2207.03012)) at $\sqrt{s_{\mathrm{NN}}}=5.02$ TeV within the cuts $p_T^{\gamma}>2$ GeV, $|\eta_\gamma|<5$, and $m_{\gamma\gamma}>5$ GeV. The cross section is
 
 ```
 sigma (pb)                   sd (pb)

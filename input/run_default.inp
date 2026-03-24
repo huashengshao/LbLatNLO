@@ -1,12 +1,29 @@
 # beam configuration
-colpar 1              # colliding particles: 1=hadron-hadron UPC, 2=electron/positron-proton, 3=e-e+, 4=gamma-gamma (exclusive, i.e., do not break up initial hadrons)
-energy_beam1 2510   # beam 1 energy per nucleon/electron/positron/gamma (GeV)
-energy_beam2 2510   # beam 2 energy per nucleon/electron/positron/gamma (GeV)
-nuclearA_beam1  208     # A of nuclear of beam 1, 0: it is proton
-nuclearA_beam2  208     # A of nuclear of beam 2, 0: it is proton
-nuclearZ_beam1  82     # Z of nuclear of beam 1, 0: it is proton
-nuclearZ_beam2  82     # Z of nuclear of beam 2, 0: it is proton
-UPC_photon_flux 1     # only colpar=1. 1: ChFF (2207.03012); 2: EDFF (2207.03012); 3: improved Weizsacker-Williams (only for proton beams)
+colpar 1                   # colliding particles: 1=hadron-hadron UPC,
+                           # 2=electron/positron-proton, 3=e-e+,
+		           # 4=gamma-gamma
+energy_beam1 2510          # beam 1 energy [in units of GeV]
+                           # per nucleon/electron/positron/gamma
+energy_beam2 2510          # beam 2 energy [in units of GeV]
+                           # per nucleon/electron/positron/gamma
+nuclearA_beam1  208        # A of nuclear of beam 1, 0: it is proton
+nuclearA_beam2  208        # A of nuclear of beam 2, 0: it is proton
+nuclearZ_beam1  82         # Z of nuclear of beam 1, 0: it is proton
+nuclearZ_beam2  82         # Z of nuclear of beam 2, 0: it is proton
+
+# gamma-UPC (2207.03012) options
+UPC_photon_flux 1          # only colpar=1. 1: ChFF (2207.03012);
+                           # 2: EDFF (2207.03012);
+                           # 3: improved Weizsacker-Williams
+			   #    (only for proton beams)
+use_MC_Glauber F           # whether or not to use MC-Glauber TAA for
+                           # the survival probability when colpar=1 and
+			   # UPC_photon_flux=1 or 2.
+intrinsic_kt  T            # whether to include the intrinsic kT due to
+                           # non-zero virtuality of the initial photon in UPCs
+# q2max in electron or proton iWW photon flux
+q2max 1d0                  # maximal q2 cut for iWW photon flux
+                           # [in units of GeV**2]		      
 
 # order
 # W loop we only have LO
@@ -30,27 +47,28 @@ coulomb 1
 
 # masses (negative means we will not include such a contribution)
 # in units of GeV
-emass  0.51099895d-3   # electron mass (pole mass)
-mumass  0.1056583755d0 # muon mass (pole mass)
-taumass 1.77693d0      # tau mass (pole mass)
-umass 0.335d0          # up quark mass (pole mass)
-dmass 0.340d0          # down quark mass (pole mass)
-smass 0.490d0          # strange quark mass (pole mass)
-cmass 1.5d0            # charm quark mass (pole mass)
-bmass 4.75d0           # bottom quark mass (pole mass)
-tmass 172.56d0         # top quark mass (pole mass)
-wmass 80.3692d0        # W mass
+emass  0.51099895d-3       # electron mass (pole mass)
+mumass  0.1056583755d0     # muon mass (pole mass)
+taumass 1.77693d0          # tau mass (pole mass)
+umass 0.335d0              # up quark mass (pole mass)
+dmass 0.340d0              # down quark mass (pole mass)
+smass 0.490d0              # strange quark mass (pole mass)
+cmass 1.5d0                # charm quark mass (pole mass)
+bmass 4.75d0               # bottom quark mass (pole mass)
+tmass 172.56d0             # top quark mass (pole mass)
+wmass 80.3692d0            # W mass
 
 # couplings
 alphaemm1     137.036d0    # alpha(0)**(-1)
-alphasMZ      0.118d0      # alpha_s(MZ) for the QCD corrections
+alphasMZ      0.118d0      # alpha_s(mZ**2) for the QCD corrections
 alphas_nloop  5            # how many loops run of alpha_s
                            # in the MSbar scheme (maximal 5)
 Gfermi        1.1663787d-5 # Gfermi only alpha_scheme=1
-alphaMZm1     128.94d0     # alpha(MZ)**(-1) with alpha_scheme=2
+alphaMZm1     128.94d0     # alpha(mZ**2)**(-1) with alpha_scheme=2
 alpha_scheme  2            # 0: use alpha(0) for the QED corrections
                            # 1: use Gmu sheme for the QED corrections
-                           # 2: use on-shell alpha(mu) scheme from alpha(MZ)
+                           # 2: use on-shell alpha(mu**2) scheme
+			   #    from alpha(mZ**2)
                            # for the QED corrections
 alpha_nloop   2            # how many fermion loops (1 or 2) run of alpha
                            # when alpha_scheme=2
@@ -65,12 +83,12 @@ rw_RScale_down 0.5d0       # lower bound for renormalisation scale variations
 rw_RScale_up   2.0d0       # upper bound for renormalisation scale variations
 
 # kinematic cuts in the lab frame
-minptp  2.0d0               # minimum photon pt
+minptp  2.0d0              # minimum photon pt
 maxptp -1.0d0              # maximum photon pt, negative no such cuts
 maxptpp -1.0d0             # maximum photon-pair pt, negative no such cuts
 maxaco  -1.0d0             # maximum acoplanarity, negative no such cuts
-maxyrapp 5d0             # maximum photon (pseudo-)rapidity
-minyrapp -5d0            # minimum photon (pseudo-)rapidity
+maxyrapp 5d0               # maximum photon (pseudo-)rapidity
+minyrapp -5d0              # minimum photon (pseudo-)rapidity
 minmpp   5d0               # minimum invariant mass of photon-photon
 maxmpp   -1d0              # maximum invariant mass of photon-photon, negative no such cuts
 
@@ -86,19 +104,22 @@ gnuplot_output   F         # gnuplot output file (T) or not (F)
 root_output      F         # root output file (T) or not (F)
 hwu_output       T         # hwu output file (T) or not (F)
 
-# gamma-UPC (2207.03012) options
-use_MC_Glauber F            # whether or not to use MC-Glauber TAA for the survival probability when colpar=1 and UPC_photon_flux=1 or 2.
-intrinsic_kt  T             # whether to include the intrinsic kT due to the non-zero virtuality of the initial photon in UPCs
-# q2max in electron or proton iWW photon flux
-q2max 1d0   # the maximal q2 cut for iWW photon flux [in units of GeV^2]
 
-# technical stuff
-grid_gen   0              # 0: check whether there is a grid. If yes, just use the grid.
-                          #    Otherwise, generate a grid first and write to the disk and then use it.
-                          # (the only option if there is either no FastGPL and handyG)
-                          # 1: force to generate a grid and write to the disk and then use it
-                          # 2: just evaluate it directly without using the grid
-improve_w_LE -1           # -1: We need to use the low/high-energy expansion results to improve the massive amplitudes
-                          #  0: We do not use the low/high-energy expansion results to improve the massive amplitudes
-                          #  1: We simply use the low-energy expansion results for the massive amplitudes
+# technical stuff (do not touch them unless you understand)
+grid_gen   0               # 0: check whether there is a grid.
+                           #    If yes, just use the grid.
+                           #    Otherwise, generate a grid first and
+			   #    write to the disk and then use it.
+                           #    (the only option if there is
+			   #     neither FastGPL nor handyG)
+                           # 1: force to generate a grid and
+			   #    write to the disk and then use it
+                           # 2: just evaluate it directly without using the grid
+
+improve_w_LE -1            # -1: We need to use the low/high-energy expansion
+	                   #     results to improve the massive amplitudes
+                           #  0: We do not use the low/high-energy expansion
+			   #     results to improve the massive amplitudes
+                           #  1: We simply use the low-energy expansion
+			   #     results for the massive amplitudes
 
