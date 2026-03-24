@@ -52,7 +52,7 @@ cd LbLatNLO
 
 ## Example
 
-If you use the default `input/run.inp` and run the code, it will calculate the NLO+LP$^\prime$ QCD+QED cross section for light-by-light scattering in ultraperipheral lead-lead collisions (with the ChFF photon flux from [gamma-UPC](https://arxiv.org/abs/2207.03012)) at $\sqrt{s_{\mathrm{NN}}}=5.02$ TeV within the cuts $p_T^{\gamma}>2$ GeV, $|\eta_\gamma|<5$, and $m_{\gamma\gamma}>5$ GeV. The cross section is
+If you use the default `input/run.inp` and run the code, it will calculate the $(\mathrm{NLO+LP})^\prime$ QCD+QED cross section for light-by-light scattering in ultraperipheral lead-lead collisions (with the ChFF photon flux from [gamma-UPC](https://arxiv.org/abs/2207.03012)) at $\sqrt{s_{\mathrm{NN}}}=5.02$ TeV within the cuts $p_T^{\gamma}>2$ GeV, $|\eta_\gamma|<5$, and $m_{\gamma\gamma}>5$ GeV. The cross section is
 
 ```
 sigma (pb)                   sd (pb)
