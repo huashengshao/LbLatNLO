@@ -11,7 +11,7 @@ nuclearA_beam2  208        # A of nuclear of beam 2, 0: it is proton
 nuclearZ_beam1  82         # Z of nuclear of beam 1, 0: it is proton
 nuclearZ_beam2  82         # Z of nuclear of beam 2, 0: it is proton
 
-# gamma-UPC (2207.03012) options
+# gamma-UPC (arXiv:2207.03012) options
 UPC_photon_flux 1          # only colpar=1. 1: ChFF (2207.03012);
                            # 2: EDFF (2207.03012);
                            # 3: improved Weizsacker-Williams
@@ -21,6 +21,7 @@ use_MC_Glauber F           # whether or not to use MC-Glauber TAA for
 			   # UPC_photon_flux=1 or 2.
 intrinsic_kt  T            # whether to include the intrinsic kT due to
                            # non-zero virtuality of the initial photon in UPCs
+			   # see appendix A of arXiv:2407.13610
 # q2max in electron or proton iWW photon flux
 q2max 1d0                  # maximal q2 cut for iWW photon flux
                            # [in units of GeV**2]		      

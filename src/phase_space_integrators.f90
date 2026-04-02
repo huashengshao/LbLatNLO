@@ -1382,7 +1382,7 @@ CONTAINS
     ENDIF
     WRITE(nunit5,'(A)') '<LesHouchesEvents version="3.0">'
     WRITE(nunit5,'(A)') '<!--'
-    WRITE(nunit5,'(A)') 'File generated with LbLatNLO (2312.16956,2312.16966)'
+    WRITE(nunit5,'(A)') 'File generated with LbLatNLO (2312.16956,2312.16966,2604.00099)'
     WRITE(nunit5,'(A)') '-->'
     IF(reweight_scale)THEN
        irwgt=0

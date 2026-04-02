@@ -12,7 +12,7 @@ Light-by-light scattering at next-to-leading order in QCD and QED
 The code will calculate the (differential) cross section and generate unweighted events of light-by-light scattering process at high-energy colliders.
 
 In addition to this repository, further documentation is available in
-[arXiv:26XX.YYYYY](https://arxiv.org/abs/26XX.YYYYY). Please cite this
+[arXiv:2604.00099](https://arxiv.org/abs/2604.00099). Please cite this
 article, [arXiv:2312.16966](https://arxiv.org/abs/2312.16966) and [arXiv:2312.16956](https://arxiv.org/abs/2312.16956), as well as relevant references therein, if you use `LbLatNLO`.
 
 
