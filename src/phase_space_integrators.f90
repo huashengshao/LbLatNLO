@@ -33,6 +33,7 @@ CONTAINS
     REAL(KIND(1d0))::temp
     CHARACTER(len=7)::A1name,A2name
     REAL(KIND(1d0))::Aval,Zval
+    REAL(KIND(1d0))::rrr
 
     include 'banner.inc'
     CALL ReadElem_integer('colpar',colpar)
@@ -307,6 +308,15 @@ CONTAINS
     endif
 
     CALL ReadElem_integer("nmc",nmc)
+    CALL ReadElem_integer("seed",seed)
+    IF(seed.LT.0)THEN
+       ! randomly update seed
+       call random_seed()      ! seed once at program start
+       call random_number(rrr)   ! r in [0.0, 1.0)
+       seed=FLOOR(rrr*20001)     ! k in {0, 1, ..., 20000}
+    ELSE
+       seed=MOD(seed,20001)
+    ENDIF
 
     IF(gener.EQ.0)THEN
        CALL LbL_VEGAS(rslt,nmc)
@@ -669,6 +679,13 @@ CONTAINS
     INTEGER::ncalm,nc,ii
     CHARACTER(len=4),DIMENSION(20)::chchar
     INTEGER::IDBMUP1,IDBMUP2,IDWTUP
+    REAL(KIND(1d0)),DIMENSION(1)::ranr
+    ! update seed by first calling RANDA seed times
+    IF(seed.GT.0)THEN
+       DO ii=1,seed
+          CALL RANDA(1,ranr)
+       ENDDO
+    ENDIF
     lwmax=0
     NPRN=-1
     if(colpar.EQ.4)then

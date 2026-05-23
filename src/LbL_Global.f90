@@ -75,6 +75,7 @@ MODULE LbL_Global
   LOGICAL::unwgt=.FALSE.
   LOGICAL::lhewgtup=.TRUE.
   INTEGER::nmc=100000
+  INTEGER::seed=-1
   ! number of lhe events
   INTEGER::Nevents=0,Nevents_posw=0,Nevents_negw=0
   REAL(KIND(1d0))::aqedup=-1d0,aqcdup=-1d0

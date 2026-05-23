@@ -98,6 +98,9 @@ gener    0                 # integrator: 0 VEGAS; 1 Romberg
 unwgt    T                 # unweighting on/off (only gener=0)
 lhewgtup T                 # xwgtup=1 (F) or not (T) in unweighted lhe file
 nmc      1000000           # number of Monte Carlo points or integrating points
+seed     0                 # seed for MC integrator (only works when gener = 0)
+                           # the range should be [0, 20000] (mod 20001)
+                           # <0 means it will update automatically
 
 # histogram output
 topdrawer_output F         # topdrawer output file (T) or not (F)
