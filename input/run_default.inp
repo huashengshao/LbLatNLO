@@ -41,7 +41,7 @@ q2max 1d0                  # maximal q2 cut for iWW photon flux
 # -3: NLO QED+QCD |A(0,0)+A(0,1)+A(1,0)|**2
 order -3
 
-# Coloumb resummation
+# Coulomb resummation
 # 0: no Coulomb resummation
 # 1: Leading power Coulomb resummation when order =/= 0 for massive fermion loops
 coulomb 1
@@ -67,7 +67,7 @@ alphas_nloop  5            # how many loops run of alpha_s
 Gfermi        1.1663787d-5 # Gfermi only alpha_scheme=1
 alphaMZm1     128.94d0     # alpha(mZ**2)**(-1) with alpha_scheme=2
 alpha_scheme  2            # 0: use alpha(0) for the QED corrections
-                           # 1: use Gmu sheme for the QED corrections
+                           # 1: use Gmu scheme for the QED corrections
                            # 2: use on-shell alpha(mu**2) scheme
 			   #    from alpha(mZ**2)
                            # for the QED corrections
